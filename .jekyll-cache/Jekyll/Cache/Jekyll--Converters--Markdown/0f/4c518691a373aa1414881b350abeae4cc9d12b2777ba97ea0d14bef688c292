@@ -1,0 +1,585 @@
+I"��<h1 id="서론">서론</h1>
+
+<p>Log API 를 개발하면서 API 문서를 작성해야 했다.  <br />
+<code class="language-plaintext highlighter-rouge">Swagger</code>는 명료한 문서를 제공하는데 적합해 보이지 않아서 컨플루언스에 직접 작성을 했었다.  <br />
+API 개발과 문서작성을 함께 진행하다보니 API End point 가 변경될 때나 코드의 변경사항이 있을 때 매번 수정을 해야하는 단점이 있어 API 문서 자동화를 알아보게 되었고, <code class="language-plaintext highlighter-rouge">Spring REST Docs</code>를 적용해봤다.</p>
+
+<h1 id="spring-rest-docs--restful-서비스-문서화작업을-도와주는-라이브러리">Spring REST Docs : RESTful 서비스 문서화작업을 도와주는 라이브러리</h1>
+
+<p>자바 문서 자동화에는 주로 <code class="language-plaintext highlighter-rouge">Swagger</code> 와 <code class="language-plaintext highlighter-rouge">Spring Rest Docs</code> 가 사용된다.</p>
+
+<p>각각의 장점과 단점은 다음과 같다.Spring Rest Docs를 적용하면서 테스트 코드를 작성을 해야했는데, 나는 처음이라 많이 헤맸다. 테스트 코드 작성에 익숙치 않다면 적용하는데 시간이 걸릴 수 있다.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left"> </th>
+      <th style="text-align: left">**Swagger**</th>
+      <th style="text-align: left">**Spring REST Docs**</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left">장점</td>
+      <td style="text-align: left">API를 테스트 해 볼 수 있다.</td>
+      <td style="text-align: left">테스트가 성공해야 문서가 작성된다.</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"> </td>
+      <td style="text-align: left">적용하기 쉽다.</td>
+      <td style="text-align: left">코드와 문서가 분리되어 있다.</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">단점</td>
+      <td style="text-align: left">코드에 어노테이션을 추가해야 한다</td>
+      <td style="text-align: left">적용하기 어렵다.  ((개인) 테스트 코드 작성이 익숙치 않으면 적용하는데 더 오래 걸린다)</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"> </td>
+      <td style="text-align: left">코드와 동기화가 안 될 수 있다.</td>
+      <td style="text-align: left"> </td>
+    </tr>
+  </tbody>
+</table>
+
+<h1 id="적용하기">적용하기</h1>
+
+<p>환경은 다음과 같다.</p>
+
+<ul>
+  <li>SpringBoot 2.6.4</li>
+  <li>Maven</li>
+  <li>Java 8</li>
+  <li>JUnit 4.13.2</li>
+  <li>AsciiDoc</li>
+</ul>
+
+<p>Spring REST docs 적용을 중점으로 작성했다. <del>테스트 코드는 사실 처음이라 다른 문서 보시길..</del></p>
+
+<h2 id="pomxml">pom.xml</h2>
+
+<ul>
+  <li>dependency
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">spring-restdocs-mockmvc</code>
+        <ul>
+          <li>mockmvc 를 restdoc 에서 사용할 수 있게 하는 라이브러리</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>build plugin
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">asciidoctor-maven-plugin</code>
+        <ul>
+          <li>Asciidoctor 를 사용하여 AsciiDoc문서를 html(default)로 변환함</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>더 자세한 Build Configuration 은 <a href="https://docs.spring.io/spring-restdocs/docs/current/reference/html5/#getting-started-build-configuration">공식 문서</a> 찾아보기</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="nt">&lt;dependencies&gt;</span>
+   <span class="nt">&lt;dependency&gt;</span>
+     <span class="nt">&lt;groupId&gt;</span>junit<span class="nt">&lt;/groupId&gt;</span>
+     <span class="nt">&lt;artifactId&gt;</span>junit<span class="nt">&lt;/artifactId&gt;</span>
+     <span class="nt">&lt;scope&gt;</span>test<span class="nt">&lt;/scope&gt;</span>
+   <span class="nt">&lt;/dependency&gt;</span>
+   <span class="nt">&lt;dependency&gt;</span>
+     <span class="nt">&lt;groupId&gt;</span>org.springframework.restdocs<span class="nt">&lt;/groupId&gt;</span>
+     <span class="nt">&lt;artifactId&gt;</span>spring-restdocs-mockmvc<span class="nt">&lt;/artifactId&gt;</span>
+      <span class="nt">&lt;scope&gt;</span>test<span class="nt">&lt;/scope&gt;</span>
+    <span class="nt">&lt;/dependency&gt;</span>
+  <span class="nt">&lt;/dependencies&gt;</span>
+
+  <span class="nt">&lt;build&gt;</span>
+    <span class="nt">&lt;plugins&gt;</span>
+      <span class="nt">&lt;plugin&gt;</span>
+        <span class="nt">&lt;groupId&gt;</span>org.asciidoctor<span class="nt">&lt;/groupId&gt;</span>
+        <span class="nt">&lt;artifactId&gt;</span>asciidoctor-maven-plugin<span class="nt">&lt;/artifactId&gt;</span>
+        <span class="nt">&lt;version&gt;</span>1.5.8<span class="nt">&lt;/version&gt;</span>
+        <span class="nt">&lt;dependencies&gt;</span>
+          <span class="nt">&lt;dependency&gt;</span>
+            <span class="nt">&lt;groupId&gt;</span>org.springframework.restdocs<span class="nt">&lt;/groupId&gt;</span>
+            <span class="nt">&lt;artifactId&gt;</span>spring-restdocs-asciidoctor<span class="nt">&lt;/artifactId&gt;</span>
+            <span class="nt">&lt;version&gt;</span>2.0.2.RELEASE<span class="nt">&lt;/version&gt;</span>
+          <span class="nt">&lt;/dependency&gt;</span>
+        <span class="nt">&lt;/dependencies&gt;</span>
+        <span class="nt">&lt;executions&gt;</span>
+          <span class="nt">&lt;execution&gt;</span>
+            <span class="nt">&lt;id&gt;</span>asciidoc-to-html<span class="nt">&lt;/id&gt;</span>
+             <span class="c">&lt;!-- asciidoctor가 동작하는 시점 정의 --&gt;</span>
+            <span class="nt">&lt;phase&gt;</span>prepare-package<span class="nt">&lt;/phase&gt;</span>
+            <span class="nt">&lt;goals&gt;</span>
+              <span class="nt">&lt;goal&gt;</span>process-asciidoc<span class="nt">&lt;/goal&gt;</span>
+            <span class="nt">&lt;/goals&gt;</span>
+            <span class="nt">&lt;configuration&gt;</span>
+              <span class="nt">&lt;backend&gt;</span>html5<span class="nt">&lt;/backend&gt;</span>
+              <span class="nt">&lt;sourceHighlighter&gt;</span>coderay<span class="nt">&lt;/sourceHighlighter&gt;</span>
+              <span class="nt">&lt;preserveDirectories&gt;</span>true<span class="nt">&lt;/preserveDirectories&gt;</span>
+              <span class="c">&lt;!-- .adoc파일들을 토대로 만든 웹 문서를 저장할 위치 선택 --&gt;</span>
+              <span class="nt">&lt;outputDirectory&gt;</span>src/main/resources/static<span class="nt">&lt;/outputDirectory&gt;</span>
+              <span class="nt">&lt;attributes&gt;</span>
+                <span class="nt">&lt;java-version&gt;</span>${java.version}<span class="nt">&lt;/java-version&gt;</span>
+                <span class="nt">&lt;spring-restdocs-version&gt;</span>${spring-restdocs.version}<span class="nt">&lt;/spring-restdocs-version&gt;</span>
+                <span class="nt">&lt;basedir&gt;</span>${project.basedir}<span class="nt">&lt;/basedir&gt;</span>
+              <span class="nt">&lt;/attributes&gt;</span>
+            <span class="nt">&lt;/configuration&gt;</span>
+          <span class="nt">&lt;/execution&gt;</span>
+        <span class="nt">&lt;/executions&gt;</span>
+      <span class="nt">&lt;/plugin&gt;</span>
+    <span class="nt">&lt;/plugins&gt;</span>
+  <span class="nt">&lt;/build&gt;</span>
+<span class="nt">&lt;/project&gt;</span>
+
+
+</code></pre></div></div>
+
+<h2 id="기초-document-코드-작성"><strong>[기초] Document 코드 작성</strong></h2>
+
+<p>test 패키지 구조는 다음과 같다</p>
+
+<p><img src="https://swimmingHwang.github.io/img/Gruntfile.png" alt="image-20220423180745372" /></p>
+
+<h3 id="1-customizing-requests-and-responses"><strong>1. Customizing requests and responses</strong></h3>
+
+<p>Spring REST Docs는 문서화 전처리기를 제공한다. 이는 요청이나 응답을 수정할 수 있다.예를 들어, local에서 테스트를 해 실제 url은 localhost:port 일테지만  url을 지정하는 등 전처리가 가능하다.헤더 제거도 가능하다.</p>
+
+<p>테스트 코드에서는 <code class="language-plaintext highlighter-rouge">getDocumentRequest</code>, <code class="language-plaintext highlighter-rouge">getDocumentResponse</code> static 메서드를 사용하여 인스턴스를 얻어 사용한다.</p>
+
+<h3 id="apidocumentutils"><strong>ApiDocumentUtils</strong></h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.xxxxx.xxxx.logapi.utils</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">springframework</span><span class="o">.</span><span class="na">restdocs</span><span class="o">.</span><span class="na">operation</span><span class="o">.</span><span class="na">preprocess</span><span class="o">.</span><span class="na">Preprocessors</span><span class="o">.</span><span class="na">modifyUris</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">springframework</span><span class="o">.</span><span class="na">restdocs</span><span class="o">.</span><span class="na">operation</span><span class="o">.</span><span class="na">preprocess</span><span class="o">.</span><span class="na">Preprocessors</span><span class="o">.</span><span class="na">preprocessRequest</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">springframework</span><span class="o">.</span><span class="na">restdocs</span><span class="o">.</span><span class="na">operation</span><span class="o">.</span><span class="na">preprocess</span><span class="o">.</span><span class="na">Preprocessors</span><span class="o">.</span><span class="na">preprocessResponse</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">org</span><span class="o">.</span><span class="na">springframework</span><span class="o">.</span><span class="na">restdocs</span><span class="o">.</span><span class="na">operation</span><span class="o">.</span><span class="na">preprocess</span><span class="o">.</span><span class="na">Preprocessors</span><span class="o">.</span><span class="na">prettyPrint</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.springframework.restdocs.operation.preprocess.OperationRequestPreprocessor</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.restdocs.operation.preprocess.OperationResponsePreprocessor</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">ApiDocumentUtils</span> <span class="o">{</span>
+
+  <span class="kd">static</span> <span class="nc">OperationRequestPreprocessor</span> <span class="nf">getDocumentRequest</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="nf">preprocessRequest</span><span class="o">(</span>
+        <span class="n">modifyUris</span><span class="o">()</span><span class="c1">// (1) 문서상 URI 변경</span>
+            <span class="o">.</span><span class="na">scheme</span><span class="o">(</span><span class="s">"https"</span><span class="o">)</span>
+            <span class="o">.</span><span class="na">host</span><span class="o">(</span><span class="s">"xxxxx.xxxxxxx.com"</span><span class="o">)</span>
+            <span class="o">.</span><span class="na">port</span><span class="o">(</span><span class="mi">37000</span><span class="o">),</span>
+        <span class="n">prettyPrint</span><span class="o">());</span><span class="c1">// (2) request 예쁘게 출력</span>
+  <span class="o">}</span>
+
+  <span class="kd">static</span> <span class="nc">OperationResponsePreprocessor</span> <span class="nf">getDocumentResponse</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="nf">preprocessResponse</span><span class="o">(</span><span class="n">prettyPrint</span><span class="o">());</span><span class="c1">// (3) response 예쁘게 출력  }</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="2-테스트-코드-작성---예시-인증-토큰-발급"><strong>2. 테스트 코드 작성 - 예시) 인증 토큰 발급</strong></h3>
+
+<ul>
+  <li>andDo 뒤에 문서화에 사용되는 항목들 작성해 주면 된다.</li>
+  <li>요청 필드, 응답 필드를 작성할 수 있으며, 더 많은 기능은 [응용] 부분에서 자세히 다룸.
+    <ul>
+      <li>타입 지정 가능</li>
+      <li>description 작성 가능</li>
+      <li>필수값 여부 작성 가능</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Test</span>
+<span class="kd">public</span> <span class="kt">void</span> <span class="n">토큰발급</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+<span class="c1">// given</span>
+	<span class="nc">TokenRequest</span> <span class="n">tokenRequest</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">TokenRequest</span><span class="o">();</span>
+	<span class="n">tokenRequest</span><span class="o">.</span><span class="na">setUsername</span><span class="o">(</span><span class="s">"username"</span><span class="o">);</span>
+	<span class="n">tokenRequest</span><span class="o">.</span><span class="na">setPassword</span><span class="o">(</span><span class="s">"password"</span><span class="o">);</span>
+
+<span class="c1">// when</span>
+	<span class="nc">ResultActions</span> <span class="n">result</span> <span class="o">=</span> <span class="k">this</span><span class="o">.</span><span class="na">mockMvc</span>
+			<span class="o">.</span><span class="na">perform</span><span class="o">(</span><span class="n">post</span><span class="o">(</span><span class="s">"/v1/token"</span><span class="o">)</span>
+					<span class="o">.</span><span class="na">contentType</span><span class="o">(</span><span class="nc">MediaType</span><span class="o">.</span><span class="na">APPLICATION_JSON</span><span class="o">)</span>
+					<span class="o">.</span><span class="na">content</span><span class="o">(</span><span class="n">mapper</span><span class="o">.</span><span class="na">writeValueAsString</span><span class="o">(</span><span class="n">tokenRequest</span><span class="o">)));</span>
+
+<span class="c1">// then</span>
+	<span class="n">result</span><span class="o">.</span><span class="na">andExpect</span><span class="o">(</span><span class="n">status</span><span class="o">().</span><span class="na">isOk</span><span class="o">())</span>
+			<span class="o">.</span><span class="na">andDo</span><span class="o">(</span><span class="n">document</span><span class="o">(</span><span class="s">"token-api"</span><span class="o">,</span><span class="c1">// 테스트 수행 시 token-api 폴더 하위에 문서가 작성된다</span>
+					<span class="n">getDocumentRequest</span><span class="o">(),</span>
+					<span class="n">getDocumentResponse</span><span class="o">(),</span>
+					<span class="n">requestFields</span><span class="o">(</span>
+							<span class="n">fieldWithPath</span><span class="o">(</span><span class="s">"username"</span><span class="o">).</span><span class="na">type</span><span class="o">(</span><span class="nc">JsonFieldType</span><span class="o">.</span><span class="na">STRING</span><span class="o">).</span><span class="na">description</span><span class="o">(</span><span class="s">"아이디"</span><span class="o">),</span>
+							<span class="n">fieldWithPath</span><span class="o">(</span><span class="s">"password"</span><span class="o">).</span><span class="na">type</span><span class="o">(</span><span class="nc">JsonFieldType</span><span class="o">.</span><span class="na">STRING</span><span class="o">).</span><span class="na">description</span><span class="o">(</span><span class="s">"패스워드"</span><span class="o">)</span>
+					<span class="o">),</span>
+					<span class="n">responseFields</span><span class="o">(</span>
+							<span class="n">beneathPath</span><span class="o">(</span><span class="s">"data"</span><span class="o">).</span><span class="na">withSubsectionId</span><span class="o">(</span><span class="s">"data"</span><span class="o">),</span>
+								<span class="n">fieldWithPath</span><span class="o">(</span><span class="s">"username"</span><span class="o">).</span><span class="na">type</span><span class="o">(</span><span class="nc">JsonFieldType</span><span class="o">.</span><span class="na">STRING</span><span class="o">).</span><span class="na">description</span><span class="o">(</span><span class="s">"아이디"</span><span class="o">),</span>
+								<span class="n">fieldWithPath</span><span class="o">(</span><span class="s">"tokenType"</span><span class="o">).</span><span class="na">type</span><span class="o">(</span><span class="nc">JsonFieldType</span><span class="o">.</span><span class="na">STRING</span><span class="o">).</span><span class="na">description</span><span class="o">(</span><span class="s">"토큰 타입"</span><span class="o">),</span>
+								<span class="n">fieldWithPath</span><span class="o">(</span><span class="s">"accessToken"</span><span class="o">).</span><span class="na">type</span><span class="o">(</span><span class="nc">JsonFieldType</span><span class="o">.</span><span class="na">STRING</span><span class="o">).</span><span class="na">description</span><span class="o">(</span><span class="s">"Access Token"</span><span class="o">)</span>
+					<span class="o">)))</span>
+			<span class="o">.</span><span class="na">andDo</span><span class="o">(</span><span class="n">print</span><span class="o">())</span>
+			<span class="o">;</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h3 id="3-테스트-실행"><strong>3. 테스트 실행</strong></h3>
+
+<p>해당 테스트 실행 시  <code class="language-plaintext highlighter-rouge">target/generated-snippets</code>  에 adoc 파일이 생성되는 것을 볼 수 있다.</p>
+
+<p><img src="https://swimmingHwang.github.io/img/image-20220423180927199.png" alt="image-20220423180927199" /></p>
+
+<p>adoc 파일은 이렇게 생겼고,</p>
+
+<p>[예시 http-request.adoc]</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[source,http,options="nowrap"]
+----
+POST /v1/token HTTP/1.1
+Content-Type: application/json;charset=UTF-8
+Content-Length: 56
+Host: xxxxx-api.xxxxx.com:37000
+
+{
+  "username" : "username",
+  "password" : "password"
+}
+----
+
+</code></pre></div></div>
+
+<p>[예시 response-body.adoc]</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[source,options="nowrap"]
+----
+{
+  "code" : "0000",
+  "message" : "SUCCESS",
+  "data" : {
+    "accessToken" : "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VybmFtZSIsImlhdCI6MTY1MDIyMTI0NSwiZXhwIjoxNjU3OTk3MjQ1fQ.Zu2M33AvK88QHQHzxe0n6CKaz5dYXskJxVWvF_9-LB1p9FGIX2pdUu4l4_bH8FJu_kbDqYH9CZ_XBWzPV1G9DA",
+    "tokenType" : "Bearer",
+    "username" : "username"
+  }
+}
+----
+
+</code></pre></div></div>
+
+<h3 id="4-전체-문서-작성"><strong>4. 전체 문서 작성</strong></h3>
+
+<p>이렇게 생성된 snippet 들을 모아 adoc 문서를 작성할 수 있다.아래는 토큰 발급 문서를 일부 발췌했다.</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>== 1. 토큰 발급
+
+`/v1/token`
+
+- 사이트에 등록된 상위 그룹 계정으로 로그 API 호출에 필요한 토큰을 발급받습니다.
+- 발급받은 토큰을 log 조회 api 호출 시 헤더에 입력해야 합니다.
+- 해당 API 를 사용하기 위해서는 사이트에서 상위그룹 생성이 필요하며 사업부로 그룹 생성 요청이 필요합니다.
+- 토큰 유효기간은 3개월 입니다. 토큰 발급 후 3개월이 지난 경우 만료되기 때문에 재발급이 필요합니다.
+
+=== Request
+
+operation::token-api[snippets='request-fields,request-body,curl-request']
+
+=== Response
+
+operation::token-api[snippets='response-fields-data,response-body,http-response']
+
+
+</code></pre></div></div>
+
+<h3 id="5-빌드"><strong>5. 빌드</strong></h3>
+
+<p>빌드까지 수행하면, 테스트 코드로 작성된 snippet들이 하나의 Html 문서로 생성된 것을 확인할 수 있다.</p>
+
+<p>이에 대한 결과물은 이렇다.</p>
+
+<p><img src="https://swimmingHwang.github.io/img/image-20220417-191743.png" alt="image-20220417-191743" /></p>
+
+<p>여기까지가 기본적으로 적용 및 결과물이다.</p>
+
+<p>더 나아가 필수값 여부 표현, 입력 포맷 표현, 공통 응답 및 공통 응답 코드를 자동화 할 수 있다.</p>
+
+<h2 id="응용-document-코드-작성">[응용] <strong>Document 코드 작성</strong></h2>
+
+<p>Request 필드에 필수값 여부에 대해 표현을 하는 등 입력 포맷에 대해 작성할 필요가 있다. 간단한 설명과 예시를 작성했다. 이를 참고하면 쉽게 작성할 수 있다.</p>
+
+<ul>
+  <li>필수값 여부</li>
+  <li>입력 포맷</li>
+  <li>공통 포맷</li>
+  <li>계층 구조 응답</li>
+</ul>
+
+<h3 id="1-필수값-여부"><strong>1. 필수값 여부</strong></h3>
+
+<p>필수값 여부를 표현하려면 테스트 코드에서 spring REST Docs에서 제공하는 optional 메서드를 사용할 수 있다. Request 필드 작성 시에 .optional() 을 붙여 선택 항목임을 알려줄 수 있고 snippet 을 customizing 하여 optional이 false일 때 필수값임을 표현할 수 있다.</p>
+
+<ul>
+  <li>snippet customizing
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">src/test/resources/org/springframework/restdocs/templates</code> <code class="language-plaintext highlighter-rouge">request-fields.snippet</code> 파일을 추가</li>
+    </ul>
+  </li>
+</ul>
+
+<p>[reqeust-fields.snippet]</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>|===
+|필드명|타입|필수여부|양식|설명
+
+
+|`++`
+|`++`
+|true
+|
+|
+
+
+|===
+
+</code></pre></div></div>
+
+<p>스니펫은 mustache 문법을 사용한다. 이런 식으로 커스텀 할 수 있다. 타이틀도 추가할 수 있고 표의 헤더 항목도 작성할 수 있다.</p>
+
+<p>mustache 문법 중 <code class="language-plaintext highlighter-rouge">}}</code> 은 param이 비어있거나 false 일때 작동된다. (기타 mustache 문법은 다른 문서 참고..)</p>
+
+<h3 id="예시"><strong>예시</strong></h3>
+
+<ul>
+  <li>필드 4개 모두 선택 항목이어서 optional 을 붙여주면 된다. 필수 여부에 공백임(false)을 볼 수 있다.
+    <ul>
+      <li><del>사실 false 로 표현하고 싶은데 시간상 못했음..</del></li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="mi">1</span><span class="n">requestFields</span><span class="o">(</span>
+<span class="mi">2</span>		<span class="n">fieldWithPath</span><span class="o">(</span><span class="s">"startDate"</span><span class="o">).</span><span class="na">type</span><span class="o">(</span><span class="nc">JsonFieldType</span><span class="o">.</span><span class="na">STRING</span><span class="o">).</span><span class="na">attributes</span><span class="o">(</span><span class="n">getDateFormat</span><span class="o">()).</span><span class="na">description</span><span class="o">(</span><span class="s">"로그 조회 시작 날짜"</span><span class="o">).</span><span class="na">optional</span><span class="o">(),</span>
+<span class="mi">3</span>		<span class="n">fieldWithPath</span><span class="o">(</span><span class="s">"endDate"</span><span class="o">).</span><span class="na">type</span><span class="o">(</span><span class="nc">JsonFieldType</span><span class="o">.</span><span class="na">STRING</span><span class="o">).</span><span class="na">attributes</span><span class="o">(</span><span class="n">getDateFormat</span><span class="o">()).</span><span class="na">description</span><span class="o">(</span><span class="s">"로그 조회 끝 날짜"</span><span class="o">).</span><span class="na">optional</span><span class="o">(),</span>
+<span class="mi">4</span>		<span class="n">fieldWithPath</span><span class="o">(</span><span class="s">"pageNum"</span><span class="o">).</span><span class="na">type</span><span class="o">(</span><span class="nc">JsonFieldType</span><span class="o">.</span><span class="na">NUMBER</span><span class="o">).</span><span class="na">description</span><span class="o">(</span><span class="s">"페이지 번호"</span><span class="o">).</span><span class="na">optional</span><span class="o">(),</span>
+<span class="mi">5</span>		<span class="n">fieldWithPath</span><span class="o">(</span><span class="s">"pageSize"</span><span class="o">).</span><span class="na">type</span><span class="o">(</span><span class="nc">JsonFieldType</span><span class="o">.</span><span class="na">NUMBER</span><span class="o">).</span><span class="na">description</span><span class="o">(</span><span class="s">"조회 건수"</span><span class="o">).</span><span class="na">optional</span><span class="o">()</span>
+<span class="mi">6</span><span class="o">),</span>
+</code></pre></div></div>
+
+<p><img src="https://swimmingHwang.github.io/img/image-20220417-193942.png" alt="image-20220417-193942" /></p>
+
+<h3 id="2-입력-포맷"><strong>2. 입력 포맷</strong></h3>
+
+<p>API spec 상 날짜 형식을 입력받아야 한다. 날짜의 경우 String 으로 입력받고 날짜 형식은 다양할 수 있어 문서에 꼭 표기를 해 줘야 했다. 입력 포맷을 지정해 주는 것도 간단하다. <code class="language-plaintext highlighter-rouge">attributes()</code> 메소드를 이용해 추가 속성을 넣어줄 수 있다.  attributes에 <code class="language-plaintext highlighter-rouge">key("format").value("yyyyMMddHHmmss")</code>  를 각각 넣어줄 수 있지만 자주 사용하므로 static 메서드로 작성해 준다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">DocumentFormatGenerator</span> <span class="o">{</span>
+  <span class="kd">static</span> <span class="nc">Attributes</span><span class="o">.</span><span class="na">Attribute</span> <span class="nf">getDateFormat</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="nf">key</span><span class="o">(</span><span class="s">"format"</span><span class="o">).</span><span class="na">value</span><span class="o">(</span><span class="s">"yyyyMMddHHmmss"</span><span class="o">);</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>코드 및 결과물은 위의 예시와 중복되어 패스</p>
+
+<h3 id="3-공통-포맷"><strong>3. 공통 포맷</strong></h3>
+
+<p>공통 포맷에는 공통 응답과 공통 응답 코드가 있다. 작성 방법은 다음과 같다.</p>
+
+<ol>
+  <li>공통 응답 코드를 return 해 주는 test controller 작성</li>
+  <li>test controller 테스트 코드 작성
+    <ul>
+      <li>공통 응답
+        <ul>
+          <li><code class="language-plaintext highlighter-rouge">customResponseFields("custom-response", ...</code>
+            <ul>
+              <li>custom-response 라는 이름으로 스니펫 생성</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li>공통 응답 코드</li>
+    </ul>
+  </li>
+</ol>
+
+<p><strong>[공통 응답 코드]</strong></p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="nc">ResultCode</span> <span class="kd">implements</span> <span class="nc">EnumType</span> <span class="o">{</span>
+
+  <span class="no">SUCCESS</span><span class="o">(</span><span class="s">"0000"</span><span class="o">,</span> <span class="s">"요청이 성공하였습니다."</span><span class="o">),</span>
+  <span class="no">AUTHENTICATION_FAILED</span><span class="o">(</span><span class="s">"2000"</span><span class="o">,</span> <span class="s">"인증에 실패하였습니다."</span><span class="o">),</span>
+  <span class="no">BAD_REQUEST</span><span class="o">(</span><span class="s">"4000"</span><span class="o">,</span> <span class="s">"요청 파라미터가 잘못되었습니다."</span><span class="o">),</span>
+  <span class="no">NOT_FOUND</span><span class="o">(</span><span class="s">"4040"</span><span class="o">,</span> <span class="s">"리소스를 찾지 못했습니다."</span><span class="o">),</span>
+  <span class="no">SERVER_FILE_ERROR</span><span class="o">(</span><span class="s">"5001"</span><span class="o">,</span> <span class="s">"서버 에러입니다."</span><span class="o">),</span>
+  <span class="o">;</span>
+
+  <span class="kd">private</span> <span class="kd">final</span> <span class="nc">String</span> <span class="n">resultCode</span><span class="o">;</span>
+  <span class="kd">private</span> <span class="kd">final</span> <span class="nc">String</span> <span class="n">message</span><span class="o">;</span>
+
+  <span class="nc">ResultCode</span><span class="o">(</span><span class="nc">String</span> <span class="n">resultCode</span><span class="o">,</span> <span class="nc">String</span> <span class="n">message</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">this</span><span class="o">.</span><span class="na">resultCode</span> <span class="o">=</span> <span class="n">resultCode</span><span class="o">;</span><span class="k">this</span><span class="o">.</span><span class="na">message</span> <span class="o">=</span> <span class="n">message</span><span class="o">;</span>
+  <span class="o">}</span>
+  <span class="o">...</span> <span class="n">생략</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p><strong>[공통 응답 코드 controller]</strong></p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="nd">@RestController</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">DocumentController</span> <span class="o">{</span>
+
+  <span class="nd">@GetMapping</span><span class="o">(</span><span class="s">"/docs"</span><span class="o">)</span>
+  <span class="kd">public</span> <span class="nc">ApiResult</span><span class="o">&lt;</span><span class="nc">DocsCode</span><span class="o">&gt;</span> <span class="nf">findAll</span><span class="o">()</span> <span class="o">{</span>
+
+    <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">apiResponseCodes</span> <span class="o">=</span> <span class="n">getDocs</span><span class="o">(</span><span class="nc">ResultCode</span><span class="o">.</span><span class="na">values</span><span class="o">());</span>
+
+    <span class="k">return</span> <span class="nc">ApiResult</span><span class="o">.</span><span class="na">succeed</span><span class="o">(</span>
+        <span class="nc">DocsCode</span><span class="o">.</span><span class="na">builder</span><span class="o">()</span>
+            <span class="o">.</span><span class="na">responseCode</span><span class="o">(</span><span class="n">apiResponseCodes</span><span class="o">)</span>
+            <span class="o">.</span><span class="na">build</span><span class="o">()</span>
+    <span class="o">);</span>
+  <span class="o">}</span>
+
+  <span class="kd">private</span> <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="nf">getDocs</span><span class="o">(</span><span class="nc">EnumType</span><span class="o">[]</span> <span class="n">enumTypes</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">stream</span><span class="o">(</span><span class="n">enumTypes</span><span class="o">)</span>
+        <span class="o">.</span><span class="na">collect</span><span class="o">(</span><span class="nc">Collectors</span><span class="o">.</span><span class="na">toMap</span><span class="o">(</span><span class="nl">EnumType:</span><span class="o">:</span><span class="n">getId</span><span class="o">,</span> <span class="nl">EnumType:</span><span class="o">:</span><span class="n">getText</span><span class="o">));</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+
+
+</code></pre></div></div>
+
+<p><strong>[테스트 코드]</strong></p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Test</span>
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">commons</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+
+<span class="c1">//when</span>
+	<span class="nc">ResultActions</span> <span class="n">result</span> <span class="o">=</span> <span class="k">this</span><span class="o">.</span><span class="na">mockMvc</span><span class="o">.</span><span class="na">perform</span><span class="o">(</span>
+			<span class="n">get</span><span class="o">(</span><span class="s">"/docs"</span><span class="o">)</span>
+					<span class="o">.</span><span class="na">accept</span><span class="o">(</span><span class="nc">MediaType</span><span class="o">.</span><span class="na">APPLICATION_JSON</span><span class="o">)</span>
+
+	<span class="o">);</span>
+
+	<span class="nc">MvcResult</span> <span class="n">mvcResult</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="na">andReturn</span><span class="o">();</span>
+	<span class="nc">ApiResult</span><span class="o">&lt;</span><span class="nc">DocsCode</span><span class="o">&gt;</span> <span class="n">response</span> <span class="o">=</span> <span class="n">mapper</span><span class="o">.</span><span class="na">readValue</span><span class="o">(</span><span class="n">mvcResult</span><span class="o">.</span><span class="na">getResponse</span><span class="o">().</span><span class="na">getContentAsString</span><span class="o">(),</span>
+				<span class="k">new</span> <span class="nc">TypeReference</span><span class="o">&lt;</span><span class="nc">ApiResult</span><span class="o">&lt;</span><span class="nc">DocsCode</span><span class="o">&gt;&gt;()</span> <span class="o">{});</span>
+
+	<span class="nc">DocsCode</span> <span class="n">resultCodeDocs</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="na">getData</span><span class="o">();</span>
+
+
+<span class="c1">//then</span>
+	<span class="n">result</span><span class="o">.</span><span class="na">andExpect</span><span class="o">(</span><span class="n">status</span><span class="o">().</span><span class="na">isOk</span><span class="o">())</span>
+			<span class="o">.</span><span class="na">andDo</span><span class="o">(</span><span class="n">document</span><span class="o">(</span><span class="s">"common"</span><span class="o">,</span>
+					<span class="n">customResponseFields</span><span class="o">(</span><span class="s">"custom-response"</span><span class="o">,</span> <span class="kc">null</span><span class="o">,</span>
+							<span class="n">attributes</span><span class="o">(</span><span class="n">key</span><span class="o">(</span><span class="s">"title"</span><span class="o">).</span><span class="na">value</span><span class="o">(</span><span class="s">"공통응답"</span><span class="o">)),</span>
+							<span class="n">fieldWithPath</span><span class="o">(</span><span class="s">"code"</span><span class="o">).</span><span class="na">type</span><span class="o">(</span><span class="nc">JsonFieldType</span><span class="o">.</span><span class="na">STRING</span><span class="o">).</span><span class="na">description</span><span class="o">(</span><span class="s">"결과코드"</span><span class="o">),</span>
+							<span class="n">fieldWithPath</span><span class="o">(</span><span class="s">"message"</span><span class="o">).</span><span class="na">type</span><span class="o">(</span><span class="nc">JsonFieldType</span><span class="o">.</span><span class="na">STRING</span><span class="o">).</span><span class="na">description</span><span class="o">(</span><span class="s">"결과메시지"</span><span class="o">),</span>
+							<span class="n">subsectionWithPath</span><span class="o">(</span><span class="s">"data"</span><span class="o">).</span><span class="na">description</span><span class="o">(</span><span class="s">"데이터"</span><span class="o">)</span>
+					<span class="o">),</span>
+					<span class="n">customResponseCodeFields</span><span class="o">(</span><span class="s">"custom-response-code"</span><span class="o">,</span> <span class="n">beneathPath</span><span class="o">(</span><span class="s">"data.responseCode"</span><span class="o">).</span><span class="na">withSubsectionId</span><span class="o">(</span><span class="s">"responseCode"</span><span class="o">),</span>
+							<span class="n">attributes</span><span class="o">(</span><span class="n">key</span><span class="o">(</span><span class="s">"title"</span><span class="o">).</span><span class="na">value</span><span class="o">(</span><span class="s">"공통 응답코드"</span><span class="o">)),</span>
+							<span class="n">enumConvertFieldDescriptor</span><span class="o">(</span><span class="n">resultCodeDocs</span><span class="o">.</span><span class="na">getResponseCode</span><span class="o">())</span>
+					<span class="o">)</span>
+			<span class="o">));</span>
+<span class="o">}</span>
+
+<span class="kd">private</span> <span class="kd">static</span> <span class="nc">FieldDescriptor</span><span class="o">[]</span> <span class="nf">enumConvertFieldDescriptor</span><span class="o">(</span><span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">enumValues</span><span class="o">)</span> <span class="o">{</span>
+
+	<span class="k">return</span> <span class="n">enumValues</span><span class="o">.</span><span class="na">entrySet</span><span class="o">().</span><span class="na">stream</span><span class="o">()</span>
+			<span class="o">.</span><span class="na">map</span><span class="o">(</span><span class="n">x</span> <span class="o">-&gt;</span> <span class="n">fieldWithPath</span><span class="o">(</span><span class="n">x</span><span class="o">.</span><span class="na">getKey</span><span class="o">()).</span><span class="na">description</span><span class="o">(</span><span class="n">x</span><span class="o">.</span><span class="na">getValue</span><span class="o">()))</span>
+			<span class="o">.</span><span class="na">toArray</span><span class="o">(</span><span class="nc">FieldDescriptor</span><span class="o">[]::</span><span class="k">new</span><span class="o">);</span>
+<span class="o">}</span>
+
+
+<span class="kd">public</span> <span class="kd">static</span> <span class="nc">CustomResponseFieldsSnippet</span> <span class="nf">customResponseFields</span><span class="o">(</span><span class="nc">String</span> <span class="n">type</span><span class="o">,</span>
+		<span class="nc">PayloadSubsectionExtractor</span><span class="o">&lt;?&gt;</span> <span class="n">subsectionExtractor</span><span class="o">,</span>
+		<span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">Object</span><span class="o">&gt;</span> <span class="n">attributes</span><span class="o">,</span> <span class="nc">FieldDescriptor</span><span class="o">...</span> <span class="n">descriptors</span><span class="o">)</span> <span class="o">{</span>
+	<span class="k">return</span> <span class="k">new</span> <span class="nf">CustomResponseFieldsSnippet</span><span class="o">(</span><span class="n">type</span><span class="o">,</span> <span class="n">subsectionExtractor</span><span class="o">,</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="n">descriptors</span><span class="o">),</span> <span class="n">attributes</span>
+			<span class="o">,</span> <span class="kc">true</span><span class="o">);</span>
+<span class="o">}</span>
+
+
+
+</code></pre></div></div>
+
+<h3 id="4-계층-구조-응답"><strong>4. 계층 구조 응답</strong></h3>
+
+<p>pagination 처리가 된 응답과 같이 계층 구조의 응답을 단순하게 표현해야 했다.</p>
+
+<ol>
+  <li>benethPath() 메서드를 이용해 data.data 하위 항목만 reponse field로 작성하기
+    <ul>
+      <li>benethPath를 하지 않으면 data.service, data.account_id 이런 식으로 표현된다</li>
+    </ul>
+  </li>
+  <li>pagination 응답 스니펫 따로 생성
+    <ul>
+      <li>pagination 응답 스니펫을 따로 생성해서 명확하게 보여주고자 했다.</li>
+    </ul>
+  </li>
+</ol>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">logApiResultAction</span>
+		<span class="o">.</span><span class="na">andExpect</span><span class="o">(</span><span class="nc">MockMvcResultMatchers</span>
+				<span class="o">.</span><span class="na">content</span><span class="o">()</span>
+				<span class="o">.</span><span class="na">string</span><span class="o">(</span><span class="n">mapper</span><span class="o">.</span><span class="na">writeValueAsString</span><span class="o">(</span><span class="nc">ApiResult</span><span class="o">.</span><span class="na">succeed</span><span class="o">(</span><span class="n">logResponse</span><span class="o">))))</span>
+		<span class="o">.</span><span class="na">andDo</span><span class="o">(</span><span class="n">document</span><span class="o">(</span><span class="s">"pips-access-log-api"</span><span class="o">,</span>
+				<span class="n">getDocumentRequest</span><span class="o">(),</span>
+				<span class="n">getDocumentResponse</span><span class="o">(),</span>
+				<span class="n">requestHeaders</span><span class="o">(</span>
+						<span class="n">headerWithName</span><span class="o">(</span><span class="s">"Authorization"</span><span class="o">).</span><span class="na">description</span><span class="o">(</span><span class="s">"Bearer auth credentials"</span><span class="o">)</span>
+				<span class="o">),</span>
+				<span class="n">requestFields</span><span class="o">(</span>
+						<span class="n">fieldWithPath</span><span class="o">(</span><span class="s">"startDate"</span><span class="o">).</span><span class="na">type</span><span class="o">(</span><span class="nc">JsonFieldType</span><span class="o">.</span><span class="na">STRING</span><span class="o">).</span><span class="na">attributes</span><span class="o">(</span><span class="n">getDateFormat</span><span class="o">()).</span><span class="na">description</span><span class="o">(</span><span class="s">"로그 조회 시작 날짜"</span><span class="o">).</span><span class="na">optional</span><span class="o">(),</span>
+						<span class="n">fieldWithPath</span><span class="o">(</span><span class="s">"endDate"</span><span class="o">).</span><span class="na">type</span><span class="o">(</span><span class="nc">JsonFieldType</span><span class="o">.</span><span class="na">STRING</span><span class="o">).</span><span class="na">attributes</span><span class="o">(</span><span class="n">getDateFormat</span><span class="o">()).</span><span class="na">description</span><span class="o">(</span><span class="s">"로그 조회 끝 날짜"</span><span class="o">).</span><span class="na">optional</span><span class="o">(),</span>
+						<span class="n">fieldWithPath</span><span class="o">(</span><span class="s">"pageNum"</span><span class="o">).</span><span class="na">type</span><span class="o">(</span><span class="nc">JsonFieldType</span><span class="o">.</span><span class="na">NUMBER</span><span class="o">).</span><span class="na">description</span><span class="o">(</span><span class="s">"페이지 번호"</span><span class="o">).</span><span class="na">optional</span><span class="o">(),</span>
+						<span class="n">fieldWithPath</span><span class="o">(</span><span class="s">"pageSize"</span><span class="o">).</span><span class="na">type</span><span class="o">(</span><span class="nc">JsonFieldType</span><span class="o">.</span><span class="na">NUMBER</span><span class="o">).</span><span class="na">description</span><span class="o">(</span><span class="s">"조회 건수"</span><span class="o">).</span><span class="na">optional</span><span class="o">()</span>
+				<span class="o">),</span>
+				<span class="n">responseFields</span><span class="o">(</span>
+						<span class="n">beneathPath</span><span class="o">(</span><span class="s">"data.data"</span><span class="o">),</span><span class="c1">//(1)</span>
+							<span class="n">fieldWithPath</span><span class="o">(</span><span class="s">"id"</span><span class="o">).</span><span class="na">type</span><span class="o">(</span><span class="nc">JsonFieldType</span><span class="o">.</span><span class="na">STRING</span><span class="o">).</span><span class="na">description</span><span class="o">(</span><span class="s">"Unique Id"</span><span class="o">).</span><span class="na">optional</span><span class="o">(),</span>
+							<span class="n">fieldWithPath</span><span class="o">(</span><span class="s">"service_name"</span><span class="o">).</span><span class="na">type</span><span class="o">(</span><span class="nc">JsonFieldType</span><span class="o">.</span><span class="na">STRING</span><span class="o">).</span><span class="na">description</span><span class="o">(</span><span class="s">"개인정보 데이터에 접근된 시스템 명"</span><span class="o">).</span><span class="na">optional</span><span class="o">(),</span>
+							<span class="n">fieldWithPath</span><span class="o">(</span><span class="s">"account_id"</span><span class="o">).</span><span class="na">type</span><span class="o">(</span><span class="nc">JsonFieldType</span><span class="o">.</span><span class="na">STRING</span><span class="o">).</span><span class="na">description</span><span class="o">(</span><span class="s">"개인정보 데이터에 접근한 계정ID"</span><span class="o">).</span><span class="na">optional</span><span class="o">(),</span>
+							<span class="n">fieldWithPath</span><span class="o">(</span><span class="s">"access_time"</span><span class="o">).</span><span class="na">type</span><span class="o">(</span><span class="nc">JsonFieldType</span><span class="o">.</span><span class="na">STRING</span><span class="o">).</span><span class="na">description</span><span class="o">(</span><span class="s">"개인정보 데이터에 접근한 시간 (ISO 8601 String)"</span><span class="o">).</span><span class="na">optional</span><span class="o">(),</span>
+							<span class="n">fieldWithPath</span><span class="o">(</span><span class="s">"access_menu"</span><span class="o">).</span><span class="na">type</span><span class="o">(</span><span class="nc">JsonFieldType</span><span class="o">.</span><span class="na">STRING</span><span class="o">).</span><span class="na">description</span><span class="o">(</span><span class="s">"사용자(직원)이 개인정보에 접근할 때 사용한 시스템의 메뉴"</span><span class="o">).</span><span class="na">optional</span><span class="o">(),</span>
+							<span class="n">fieldWithPath</span><span class="o">(</span><span class="s">"location"</span><span class="o">).</span><span class="na">type</span><span class="o">(</span><span class="nc">JsonFieldType</span><span class="o">.</span><span class="na">STRING</span><span class="o">).</span><span class="na">description</span><span class="o">(</span><span class="s">"IP Location"</span><span class="o">).</span><span class="na">optional</span><span class="o">(),</span>
+							<span class="n">fieldWithPath</span><span class="o">(</span><span class="s">"activity_category"</span><span class="o">).</span><span class="na">type</span><span class="o">(</span><span class="nc">JsonFieldType</span><span class="o">.</span><span class="na">STRING</span><span class="o">).</span><span class="na">description</span><span class="o">(</span><span class="s">"개인정보 데이터 취급 activity"</span><span class="o">).</span><span class="na">optional</span><span class="o">(),</span>
+							<span class="n">fieldWithPath</span><span class="o">(</span><span class="s">"access_data"</span><span class="o">).</span><span class="na">type</span><span class="o">(</span><span class="nc">JsonFieldType</span><span class="o">.</span><span class="na">STRING</span><span class="o">).</span><span class="na">description</span><span class="o">(</span><span class="s">"접근한 개인정보 데이터의 종류"</span><span class="o">).</span><span class="na">optional</span><span class="o">(),</span>
+							<span class="n">fieldWithPath</span><span class="o">(</span><span class="s">"data_subject"</span><span class="o">).</span><span class="na">type</span><span class="o">(</span><span class="nc">JsonFieldType</span><span class="o">.</span><span class="na">STRING</span><span class="o">).</span><span class="na">description</span><span class="o">(</span><span class="s">"정보주체의 정보"</span><span class="o">).</span><span class="na">optional</span><span class="o">(),</span>
+							<span class="n">fieldWithPath</span><span class="o">(</span><span class="s">"bulk_query"</span><span class="o">).</span><span class="na">type</span><span class="o">(</span><span class="nc">JsonFieldType</span><span class="o">.</span><span class="na">STRING</span><span class="o">).</span><span class="na">description</span><span class="o">(</span><span class="s">"다수의 정보주체의 정보에 접근했을 시 쿼리"</span><span class="o">).</span><span class="na">optional</span><span class="o">()</span>
+				<span class="o">),</span>
+<span class="c1">//(2)</span>
+				<span class="n">customResponseFields</span><span class="o">(</span><span class="s">"response"</span><span class="o">,</span> <span class="n">beneathPath</span><span class="o">(</span><span class="s">"data"</span><span class="o">).</span><span class="na">withSubsectionId</span><span class="o">(</span><span class="s">"pagination"</span><span class="o">),</span>
+						<span class="n">attributes</span><span class="o">(</span><span class="n">key</span><span class="o">(</span><span class="s">"title"</span><span class="o">).</span><span class="na">value</span><span class="o">(</span><span class="s">"페이지네이션 응답코드"</span><span class="o">)),</span>
+						<span class="n">fieldWithPath</span><span class="o">(</span><span class="s">"hasNext"</span><span class="o">).</span><span class="na">type</span><span class="o">(</span><span class="nc">JsonFieldType</span><span class="o">.</span><span class="na">BOOLEAN</span><span class="o">).</span><span class="na">description</span><span class="o">(</span><span class="s">"다음 페이지 여부"</span><span class="o">),</span>
+						<span class="n">fieldWithPath</span><span class="o">(</span><span class="s">"data"</span><span class="o">).</span><span class="na">type</span><span class="o">(</span><span class="nc">JsonFieldType</span><span class="o">.</span><span class="na">ARRAY</span><span class="o">).</span><span class="na">description</span><span class="o">(</span><span class="s">"로그 정보"</span><span class="o">)</span>
+				<span class="o">)</span>
+		<span class="o">))</span>
+		<span class="o">.</span><span class="na">andReturn</span><span class="o">();</span>
+</code></pre></div></div>
+
+<h2 id="최종-결과물">최종 결과물</h2>
+
+<p><img src="https://swimmingHwang.github.io/img/image-20220417-185120.png" alt="image-20220417-185120" /></p>
+
+<h2 id="마무리">마무리</h2>
+
+<p>처음에 테스트 코드를 작성해야 해서 많이 버벅거렸는데 한 번 작성해 두니 너무 편했다. <br />
+(강제로 테스트 코드 짜봐서 도움되기도 했다..) 우리 팀에서 Swagger만 쓰긴하지만, 다른 REST API 를 만들고 외부에 배포해야 할 때, 사용하면 좋을 것 같아 공유한다. <br />
+그리고 Spring REST Docs 작성하는 방법도 더 다양하니 프로젝트 특성에 맞게 활용하여 쓰면 될 것 같다.</p>
+
+<h3 id="참고"><strong>참고</strong></h3>
+
+<ul>
+  <li>
+    <p><a href="https://docs.spring.io/spring-restdocs/docs/current/reference/html5/">Spring REST Docs</a></p>
+  </li>
+  <li>
+    <p><a href="https://techblog.woowahan.com/2597/">Spring Rest Docs 적용 - 우아한형제들 기술블로그</a></p>
+  </li>
+  <li>
+    <p><a href="https://techblog.woowahan.com/2678/">Spring REST Docs에 날개를… (feat: Popup) - 우아한형제들 기술블로그</a></p>
+  </li>
+</ul>
+:ET

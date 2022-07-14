@@ -1,0 +1,91 @@
+---
+layout:     post
+title:      BOJ) 숨바꼭질
+author:     Soo-young Hwang
+tags: 		Coding-test
+subtitle:   최단경로
+category:  study
+---
+
+<blockquote>문제</blockquote>
+[숨바꼭질](https://www.acmicpc.net/problem/6118)   
+
+![image-20220217004206535](/Users/sooyoung/SwimmingHwang.github.io/img/image-20220217004206535.png)
+
+사용 언어 : `python3`      
+개념 : 최단경로, 다익스트라 알고리즘
+
+<blockquote>최단경로</blockquote>
+
+
+#### > 내 풀이
+
+**핵심**   
+1) 최단 경로 알고리즘 - 다익스트라
+	- 1에서 출발하여 경로가 제일 긴 정점 구하기, 긴 정점까지의 거리 구하기, 그 거리와 같은 정점들 구하기 -> distance array 꼭 필요   
+2) 인접리스트로 구현
+
+
+
+
+{% highlight python %}
+import heapq
+import sys
+
+input = sys.stdin.readline
+INF = int(1e9)
+
+n, m = map(int, input().split())
+
+graph = [[] for _ in range(n + 1)]
+distance = [INF] * (n + 1)
+
+
+for _ in range(m): # 인접행렬 방식   
+
+    a_i, b_i = map(int, input().split())
+    graph[a_i].append((b_i, 1))
+    graph[b_i].append((a_i, 1))
+
+def dijkstra(start):
+    q = []
+    heapq.heappush(q, (0, start))  # cost, vertex
+    
+    distance[start] = 0
+    
+    while q:
+        dist, now = heapq.heappop(q)
+        if distance[now] < dist:
+            continue
+         for v in graph[now]:
+            cost = dist + 1
+            if cost < distance[v[0]]:
+                distance[v[0]] = cost
+                heapq.heappush(q, (cost, v[0]))
+
+
+dijkstra(1)
+
+# 첫 번째는 숨어야 하는 헛간 번호를(만약 거리가 같은 헛간이 여러개면 가장 작은 헛간 번호를 출력한다),
+
+
+# 두 번째는 그 헛간까지의 거리를,
+
+
+# 세 번째는 그 헛간과 같은 거리를 갖는 헛간의 개수를 출력해야한다.
+
+
+distance = distance[1:]
+maxDistance = max(distance)
+
+print(distance.index(maxDistance)+1, maxDistance, distance.count(maxDistance))
+
+{% endhighlight %}
+
+
+#### > 배운 점 
+1. 리스트에서 최대값의 index를 구하려면
+- list.index(max_val)
+2. 리스트에서 원소의 갯수 구하려면
+- list.count(elem)
+

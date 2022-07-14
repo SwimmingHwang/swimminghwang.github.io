@@ -1,0 +1,87 @@
+I"�(<h3 id="vuejs-axios를-이용한-springboot로-이미지-파일-업로드하는-법"><code class="language-plaintext highlighter-rouge">Vue.js</code> <code class="language-plaintext highlighter-rouge">axios</code>를 이용한 <code class="language-plaintext highlighter-rouge">SpringBoot</code>로 이미지 파일 업로드하는 법</h3>
+<ul>
+  <li>코드만 기록했고 코드에 대한 간략한 설명만 기술함.</li>
+  <li>버전 : <code class="language-plaintext highlighter-rouge">vue.js</code> 2버전, <code class="language-plaintext highlighter-rouge">Spring boot</code> 2.3.4 버전</li>
+</ul>
+
+<p>&lt;/br&gt;</p>
+<h3 id="코드">코드</h3>
+
+<h4 id="백엔드-spring-boot">백엔드 (<code class="language-plaintext highlighter-rouge">Spring-boot</code>)</h4>
+<blockquote>컨트롤러</blockquote>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@PostMapping</span>
+  <span class="nc">ResponseEntity</span><span class="o">&lt;?&gt;</span> <span class="n">create</span><span class="o">(</span><span class="nc">SendNumberDto</span> <span class="n">dto</span><span class="o">)</span> <span class="o">{</span>
+    <span class="nc">CommonResponse</span><span class="o">&lt;?&gt;</span> <span class="n">response</span> <span class="o">=</span> <span class="n">sendNumberService</span><span class="o">.</span><span class="na">registerSendNumber</span><span class="o">(</span><span class="n">dto</span><span class="o">);</span>
+    <span class="k">return</span> <span class="k">new</span> <span class="nc">ResponseEntity</span><span class="o">&lt;&gt;(</span><span class="n">response</span><span class="o">,</span> <span class="nc">HttpStatus</span><span class="o">.</span><span class="na">OK</span><span class="o">);</span>
+  <span class="o">}</span>
+</code></pre></div></div>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">@RequestBody</code>를 붙이면 안 된다.
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">@RequestBody</code>는 클라이언트가 전송하는 <strong><code class="language-plaintext highlighter-rouge">Json(application/json)</code> 형태</strong>의 <code class="language-plaintext highlighter-rouge">HTTP Body</code> 내용을 <code class="language-plaintext highlighter-rouge">Java Object</code>로 변환시켜주는 역할을 하기 때문에, <code class="language-plaintext highlighter-rouge">multipartFile</code> type이 있을 때 변환하는데 다른 <code class="language-plaintext highlighter-rouge">serializer</code>가 필요하다는 에러를 던진다.</li>
+    </ul>
+  </li>
+</ul>
+
+<blockquote>DTO</blockquote>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Data</span>
+<span class="nd">@Builder</span>
+<span class="nd">@AllArgsConstructor</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">SendNumberDto</span> <span class="o">{</span>
+  <span class="kd">private</span> <span class="nc">Long</span> <span class="n">id</span><span class="o">;</span>
+  <span class="kd">private</span> <span class="nc">Long</span> <span class="n">memberId</span><span class="o">;</span>
+  <span class="kd">private</span> <span class="nc">String</span> <span class="n">name</span><span class="o">;</span>
+  <span class="kd">private</span> <span class="nc">String</span> <span class="n">sendNumber</span><span class="o">;</span>
+  <span class="kd">private</span> <span class="nc">String</span> <span class="n">topYn</span><span class="o">;</span>
+  <span class="kd">private</span> <span class="nc">String</span> <span class="n">desc</span><span class="o">;</span>
+  <span class="kd">private</span> <span class="nc">String</span> <span class="n">status</span><span class="o">;</span>
+  <span class="kd">private</span> <span class="nc">String</span> <span class="n">rejectReason</span><span class="o">;</span>
+  <span class="kd">private</span> <span class="nc">Long</span> <span class="n">authNumber</span><span class="o">;</span>
+  <span class="kd">private</span> <span class="nc">Long</span> <span class="n">fileId</span><span class="o">;</span>
+  <span class="kd">private</span> <span class="nc">String</span> <span class="n">originFileName</span><span class="o">;</span>
+  <span class="kd">private</span> <span class="nc">String</span> <span class="n">fileName</span><span class="o">;</span>
+  <span class="kd">private</span> <span class="nc">String</span> <span class="n">delYn</span><span class="o">;</span>
+  <span class="kd">private</span> <span class="nc">MultipartFile</span> <span class="n">files</span><span class="o">;</span>
+  <span class="kd">private</span> <span class="nc">String</span> <span class="n">createdBy</span><span class="o">;</span>
+  <span class="kd">private</span> <span class="nc">LocalDateTime</span> <span class="n">createdDate</span><span class="o">;</span>
+  <span class="kd">private</span> <span class="nc">String</span> <span class="n">lastModifiedBy</span><span class="o">;</span>
+  <span class="kd">private</span> <span class="nc">LocalDateTime</span> <span class="n">lastModifiedDate</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></div></div>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">null</code>이 허용되지 않는 <code class="language-plaintext highlighter-rouge">primitive</code> type <code class="language-plaintext highlighter-rouge">long</code> 에서 <code class="language-plaintext highlighter-rouge">Long</code>으로 수정했음.</li>
+  <li><code class="language-plaintext highlighter-rouge">java.lang.IllegalStateException: No primary or default constructor found for class</code> 라는 에러가 났었다. 기본생성자가 없다는 에러였다. <code class="language-plaintext highlighter-rouge">@Data @Builder</code> 만 있었을 때 생겼던 에러였다. <br />
+  이를 해결하기 위해, <code class="language-plaintext highlighter-rouge">@NoArgsConstructor</code>를 이용하여 기본 생성자를 만들어줬더니 빌더에 꼭 필요한 생성자가 있는데 위의 어노테이션으로 요소가 하나도 없는 생성자로 대체되어서 에러메시지가 또 생겼다. 그래서 <code class="language-plaintext highlighter-rouge">@AllArgsConstructor</code>를 붙여 모든 요소가 포함되는 생성자를 생성하도록 명시했다.</li>
+</ul>
+
+<p><br /></p>
+
+<h4 id="프론트엔드-vuejs">프론트엔드 (<code class="language-plaintext highlighter-rouge">Vue.js</code>)</h4>
+<blockquote>axios를 이용해 post request하는 부분</blockquote>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">serialize</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">object-to-formdata</span><span class="dl">'</span>
+
+<span class="kd">let</span> <span class="nx">formData</span> <span class="o">=</span> <span class="nx">serialize</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">sendNumber</span><span class="p">)</span>
+
+<span class="k">if</span><span class="p">(</span><span class="nx">isValid</span> <span class="o">&amp;&amp;</span> <span class="k">this</span><span class="p">.</span><span class="nx">sendNumber</span><span class="p">.</span><span class="nx">memberId</span><span class="p">){</span>
+  <span class="k">if</span><span class="p">(</span><span class="nx">confirm</span><span class="p">(</span><span class="dl">'</span><span class="s1">등록하시겠습니까?</span><span class="dl">'</span><span class="p">)){</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">$axios</span><span class="p">.</span><span class="nx">post</span><span class="p">(</span><span class="dl">'</span><span class="s1">/api/send-number</span><span class="dl">'</span><span class="p">,</span><span class="nx">formData</span> <span class="p">,</span> <span class="p">{</span>
+      <span class="na">headers</span><span class="p">:{</span>
+          <span class="dl">'</span><span class="s1">Authorization</span><span class="dl">'</span> <span class="p">:</span> <span class="s2">`Bearer </span><span class="p">${</span><span class="nx">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">localStorage</span><span class="p">.</span><span class="nx">getItem</span><span class="p">(</span><span class="dl">'</span><span class="s1">user</span><span class="dl">'</span><span class="p">)).</span><span class="nx">accessToken</span><span class="p">}</span><span class="s2">`</span><span class="p">,</span>
+          <span class="dl">'</span><span class="s1">Content-Type</span><span class="dl">'</span><span class="p">:</span> <span class="dl">"</span><span class="s2">multipart/form-data</span><span class="dl">"</span><span class="p">,</span>
+          <span class="na">contentType</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span> 
+          <span class="na">processData</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+        <span class="p">}</span>
+      <span class="p">})</span>
+    <span class="p">.</span><span class="nx">then</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+<span class="c1">//... 생략</span>
+</code></pre></div></div>
+<ul>
+  <li><a href="https://stackoverflow.com/questions/22783108/convert-js-object-to-form-data">object를 <code class="language-plaintext highlighter-rouge">formdata</code>로 변환</a>하고 form형태로 request 요청함.</li>
+  <li>vue.js 에서 object 그대로 (this.sendNumber)을 쓰면 에러났었음
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">the request was rejected because no multipart boundary was found</code></li>
+      <li>이 에러를 해결하기 위해 <a href="https://www.npmjs.com/package/object-to-formdata"><code class="language-plaintext highlighter-rouge">import { serialize } from 'object-to-formdata'</code></a>를 임포트해주고 <code class="language-plaintext highlighter-rouge">serialize</code> 함. (<code class="language-plaintext highlighter-rouge">npm install object-to-formdata</code>)</li>
+    </ul>
+  </li>
+</ul>
+:ET

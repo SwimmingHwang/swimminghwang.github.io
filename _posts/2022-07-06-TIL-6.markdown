@@ -1,0 +1,166 @@
+---
+layout:     post
+title:      Java Problem Solving - Array (2)
+author:     Soo-young Hwang
+tags: 		JAVA
+subtitle:  	Array가 사용된 문제 풀이
+category:   study
+published: true
+---
+
+# Array 를 활용한 문제 풀이
+
+- Array 기초 문제를 풀면서 알게 된 함수나 개념을 기술한다.
+
+
+## 3. 봉우리
+
+> 아래와 같이 격자판이 주어졌을 때 각 격자판의 숫자 중 자신의 상하좌우 숫자보다 큰 숫자는 봉우리 지역이다.  
+> 봉우리 지역이 몇 개 있는 지 구하기 알아내는. 격자의 가장자리는 0으로 초기화 되었다고 가정한다. (가장자리 빼고 입력된다.)
+
+![img](https://cote.inflearn.com/public/upload/d0a3fd4667.jpg)
+
+이문제는 이중포문으로 순회하면서 일일히 확인해 주면 된다.
+나는 if 문으로만 구현했지만,   
+해설에 있는`nx = i + dx[k] ` `ny = j + dy[k]` 로 코드 라인 수도 줄이고 실수도 줄이는 코드 익히고자 정리했다
+
+```java
+ypackage array;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.StringTokenizer;
+
+public class 봉우리 {
+  // 방향 배열을 활용한, 익히고 싶은 코드! -> 나중에 여섯방향, 그 이상을 확인할 때도 편하다 
+  int[] dx = {-1, 0, 1, 0};
+  int[] dy = {0, 1, 0, -1};
+
+  private int solution1(int n, int[][] arr) {
+    int answer = 0;
+    for (int i = 0; i < n; i++) {
+      for (int j = 0; j < n; j++) {
+        boolean flag = true;
+        for (int k = 0; k < 4; k++) { // 네방향 확인
+          int nx = i + dx[k]; // next x = i + direction x 
+          int ny = j + dy[k]; // next y = i + direction y 
+          if (nx >= 0 && ny >= 0 && nx < n && ny < n &&
+                  arr[nx][ny] >= arr[i][j]) flag = false;
+        }
+        if (flag) answer++;
+      }
+    }
+    return answer;
+  }
+	// 내가 짠 if문으로마 코드 
+  private int solution(int n, int[][] arr) {
+    int answer = 0;
+    for (int i = 0; i < n; i++) {
+      for (int j = 0; j < n; j++) {
+        if (i - 1 >= 0)
+          if (arr[i][j] <= arr[i - 1][j]) continue;
+        if (j - 1 >= 0)
+          if (arr[i][j] <= arr[i][j - 1]) continue;
+        if (i + 1 <= n - 1)
+          if (arr[i][j] <= arr[i + 1][j]) continue;
+        if (j + 1 <= n - 1)
+          if (arr[i][j] <= arr[i][j + 1]) continue;
+        answer++;
+      }
+    }
+    return answer;
+  }
+
+  public static void main(String[] args) throws IOException {
+    봉우리 T = new 봉우리();
+    BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+    int n = Integer.parseInt(br.readLine());
+    int[][] arr = new int[n][n];
+    StringTokenizer st;
+    for (int i = 0; i < n; i++) {
+      st = new StringTokenizer(br.readLine());
+      for (int j = 0; j < n; j++) {
+        arr[i][j] = Integer.parseInt(st.nextToken());
+      }
+    }
+    System.out.println(T.solution(n, arr));
+  }
+}
+
+```
+
+
+
+## 4. 임시반장 정하기
+
+많이 헤맸던 문제.
+
+### 문제
+
+김갑동 선생님은 올해 6학년 1반 담임을 맡게 되었다.   
+김갑동 선생님은 우선 임시로 반장을 정하고 학생들이 서로 친숙해진 후에 정식으로 선거를 통해 반장을 선출하려고 한다.   
+그는 자기반 학생 중에서 1학년부터 5학년까지 지내오면서 한번이라도 같은 반이었던 사람이 가장 많은 학생을 임시 반장으로 정하려 한다.
+그래서 김갑동 선생님은 각 학생들이 1학년부터 5학년까지 몇 반에 속했었는지를 나타내는 표를 만들었다.   
+예를 들어 학생 수가 5명일 때의 표를 살펴보자.   
+
+![Image1.jpg](https://cote.inflearn.com/public/upload/f8a83920ca.jpg)
+
+위 경우에 4번 학생을 보면 3번 학생과 2학년 때 같은 반이었고, 3번 학생 및 5번 학생과 3학년 때 같은 반이었으며,   
+2번 학생과는 4학년 때 같은 반이었음을 알 수 있다. 그러므로 이 학급에서 4번 학생과 한번이라도   
+같은 반이었던 사람은 2번 학생, 3번 학생과 5번 학생으로 모두 3명이다.   
+이 예에서 4번 학생이 전체 학생 중에서 같은 반이었던 학생 수가 제일 많으므로 임시 반장이 된다.    
+각 학생들이 1학년부터 5학년까지 속했던 반이 주어질 때, 임시 반장을 정하는 프로그램을 작성하시오.
+
+#### 입력
+
+첫째 줄에는 반의 학생 수를 나타내는 정수가 주어진다. 학생 수는 3 이상 1000 이하이다.   
+둘째 줄부터는 1번 학생부터 차례대로 각 줄마다 1학년부터 5학년까지 몇 반에 속했었는지를 나타내는 5개의 정수가 빈칸 하나를 사이에 두고 주어진다.   
+주어지는 정수는 모두 1 이상 9 이하의 정수이다.   
+
+#### 출력
+
+첫 줄에 임시 반장으로 정해진 학생의 번호를 출력한다.   
+단, 임시 반장이 될 수 있는 학생이 여러 명인 경우에는 그 중 가장 작은 번호만 출력한다.
+
+
+
+예시 입력 1
+
+```
+5
+2 3 1 7 3
+4 1 9 6 8
+5 5 2 4 4
+6 5 2 6 7
+8 4 2 2 2
+```
+
+문제 출처 : https://www.inflearn.com/course/%EC%9E%90%EB%B0%94-%EC%95%8C%EA%B3%A0%EB%A6%AC%EC%A6%98-%EB%AC%B8%EC%A0%9C%ED%92%80%EC%9D%B4-%EC%BD%94%ED%85%8C%EB%8C%80%EB%B9%84/lecture/72729?
+
+
+
+이 문제는 이미 카운트를 한 학생인지 확인하는 부분이 어려웠다.   
+처음에 설계를 할 때, 가장 바깥 for문에 학년을 넣고 각 학년 별로 같은 반이면   
+그 학생 인덱스의 리스트에 친구 인덱스를 넣어주게 끔 설계를 했었다.
+
+(시도)**i학년에 j학생 j학생이 같은 반인지를 확인해서 저장해 주려 했다.**  
+예를 들어, 2학년이라면 2학년 때  (i=1), j학생과 k 학생이 같으면 j 의 리스트에 k를 넣고 k리스트에 j 를 넣는 느낌. (혹은 같은 반이었다고 마킹하는 배열이 필요했을 것 )   
+이렇게 설계를 하니 저장을 한 학생마다 리스트가 필요했고 (혹은 같은 반 이었다는걸 마킹하는 이중배열) 풀이 과정이 복잡해 졌다.   
+그래서 풀이를 보니 **i 학생이 j 학생들과 k학년 동안** 같은 반이었던 **친구 수를 카운트**를 했다.   
+예를 들어 3번 학생은   
+
+- 1번 학생과 1학년~5학년 검사 같은 반인 적이 없음 (j++)
+- 2번학생과 1학년~5학년 검사  같은 반인 적 없음 (j++)
+- 본인 패스(해도 되고 안 해도 되고)
+- 4번 학생과 1 x 2학년 때 같은 반 cnt++  **이미 한 번 같은 반 이니까 break**
+- 5번 학생과 1 x , 2 x 3학년 때 같은 반 cnt++ **이미 한 번 같은 반 이니까 break**
+
+그러면 3번 학생은 같은 반인 친구가 2명(cnt)이 있다   
+여기서 임시반장을 뽑는 거니까 max와 몇번 학생인지 비교하면서 max 보다 크면 그 학생 인덱스를 answer 변수에 저장하고 카운트를 max에 넣어주면 된다.   
+
+
+> 이 문제를 풀면서 for문 작성 시 문제에 맞게 설계하고, 무엇을 순회할지 정하는게 중요함을 배울 수 있었다.   
+> 다음에 비슷한 유형의 문제 풀때는 뭐랑 뭐를 순회하며 비교할지, 어떤 값을 저장하면 좋을지 고민하고 해결해 보자.   
+> 그리고 단순하게 생각하자 
+

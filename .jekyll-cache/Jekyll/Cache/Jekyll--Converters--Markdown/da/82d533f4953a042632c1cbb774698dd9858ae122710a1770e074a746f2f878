@@ -1,0 +1,155 @@
+I"CJ<h1 id="array-를-활용한-문제-풀이">Array 를 활용한 문제 풀이</h1>
+
+<ul>
+  <li>Array 기초 문제를 풀면서 알게 된 함수나 개념을 기술한다.</li>
+</ul>
+
+<h2 id="3-봉우리">3. 봉우리</h2>
+
+<blockquote>
+  <p>아래와 같이 격자판이 주어졌을 때 각 격자판의 숫자 중 자신의 상하좌우 숫자보다 큰 숫자는 봉우리 지역이다.<br />
+봉우리 지역이 몇 개 있는 지 구하기 알아내는. 격자의 가장자리는 0으로 초기화 되었다고 가정한다. (가장자리 빼고 입력된다.)</p>
+</blockquote>
+
+<p><img src="https://cote.inflearn.com/public/upload/d0a3fd4667.jpg" alt="img" /></p>
+
+<p>이문제는 이중포문으로 순회하면서 일일히 확인해 주면 된다.
+나는 if 문으로만 구현했지만, <br />
+해설에 있는<code class="language-plaintext highlighter-rouge">nx = i + dx[k] </code> <code class="language-plaintext highlighter-rouge">ny = j + dy[k]</code> 로 코드 라인 수도 줄이고 실수도 줄이는 코드 익히고자 정리했다</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">ypackage</span> <span class="n">array</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.io.BufferedReader</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.IOException</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.InputStreamReader</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.StringTokenizer</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">봉우리</span> <span class="o">{</span>
+  <span class="c1">// 방향 배열을 활용한, 익히고 싶은 코드! -&gt; 나중에 여섯방향, 그 이상을 확인할 때도 편하다 </span>
+  <span class="kt">int</span><span class="o">[]</span> <span class="n">dx</span> <span class="o">=</span> <span class="o">{-</span><span class="mi">1</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">0</span><span class="o">};</span>
+  <span class="kt">int</span><span class="o">[]</span> <span class="n">dy</span> <span class="o">=</span> <span class="o">{</span><span class="mi">0</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="o">-</span><span class="mi">1</span><span class="o">};</span>
+
+  <span class="kd">private</span> <span class="kt">int</span> <span class="nf">solution1</span><span class="o">(</span><span class="kt">int</span> <span class="n">n</span><span class="o">,</span> <span class="kt">int</span><span class="o">[][]</span> <span class="n">arr</span><span class="o">)</span> <span class="o">{</span>
+    <span class="kt">int</span> <span class="n">answer</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+    <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+      <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">n</span><span class="o">;</span> <span class="n">j</span><span class="o">++)</span> <span class="o">{</span>
+        <span class="kt">boolean</span> <span class="n">flag</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="o">;</span> <span class="n">k</span><span class="o">++)</span> <span class="o">{</span> <span class="c1">// 네방향 확인</span>
+          <span class="kt">int</span> <span class="n">nx</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="n">dx</span><span class="o">[</span><span class="n">k</span><span class="o">];</span> <span class="c1">// next x = i + direction x </span>
+          <span class="kt">int</span> <span class="n">ny</span> <span class="o">=</span> <span class="n">j</span> <span class="o">+</span> <span class="n">dy</span><span class="o">[</span><span class="n">k</span><span class="o">];</span> <span class="c1">// next y = i + direction y </span>
+          <span class="k">if</span> <span class="o">(</span><span class="n">nx</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">ny</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">nx</span> <span class="o">&lt;</span> <span class="n">n</span> <span class="o">&amp;&amp;</span> <span class="n">ny</span> <span class="o">&lt;</span> <span class="n">n</span> <span class="o">&amp;&amp;</span>
+                  <span class="n">arr</span><span class="o">[</span><span class="n">nx</span><span class="o">][</span><span class="n">ny</span><span class="o">]</span> <span class="o">&gt;=</span> <span class="n">arr</span><span class="o">[</span><span class="n">i</span><span class="o">][</span><span class="n">j</span><span class="o">])</span> <span class="n">flag</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">flag</span><span class="o">)</span> <span class="n">answer</span><span class="o">++;</span>
+      <span class="o">}</span>
+    <span class="o">}</span>
+    <span class="k">return</span> <span class="n">answer</span><span class="o">;</span>
+  <span class="o">}</span>
+	<span class="c1">// 내가 짠 if문으로마 코드 </span>
+  <span class="kd">private</span> <span class="kt">int</span> <span class="nf">solution</span><span class="o">(</span><span class="kt">int</span> <span class="n">n</span><span class="o">,</span> <span class="kt">int</span><span class="o">[][]</span> <span class="n">arr</span><span class="o">)</span> <span class="o">{</span>
+    <span class="kt">int</span> <span class="n">answer</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+    <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+      <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">n</span><span class="o">;</span> <span class="n">j</span><span class="o">++)</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="o">)</span>
+          <span class="k">if</span> <span class="o">(</span><span class="n">arr</span><span class="o">[</span><span class="n">i</span><span class="o">][</span><span class="n">j</span><span class="o">]</span> <span class="o">&lt;=</span> <span class="n">arr</span><span class="o">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="o">][</span><span class="n">j</span><span class="o">])</span> <span class="k">continue</span><span class="o">;</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="o">)</span>
+          <span class="k">if</span> <span class="o">(</span><span class="n">arr</span><span class="o">[</span><span class="n">i</span><span class="o">][</span><span class="n">j</span><span class="o">]</span> <span class="o">&lt;=</span> <span class="n">arr</span><span class="o">[</span><span class="n">i</span><span class="o">][</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="o">])</span> <span class="k">continue</span><span class="o">;</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="o">)</span>
+          <span class="k">if</span> <span class="o">(</span><span class="n">arr</span><span class="o">[</span><span class="n">i</span><span class="o">][</span><span class="n">j</span><span class="o">]</span> <span class="o">&lt;=</span> <span class="n">arr</span><span class="o">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="o">][</span><span class="n">j</span><span class="o">])</span> <span class="k">continue</span><span class="o">;</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="o">)</span>
+          <span class="k">if</span> <span class="o">(</span><span class="n">arr</span><span class="o">[</span><span class="n">i</span><span class="o">][</span><span class="n">j</span><span class="o">]</span> <span class="o">&lt;=</span> <span class="n">arr</span><span class="o">[</span><span class="n">i</span><span class="o">][</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="o">])</span> <span class="k">continue</span><span class="o">;</span>
+        <span class="n">answer</span><span class="o">++;</span>
+      <span class="o">}</span>
+    <span class="o">}</span>
+    <span class="k">return</span> <span class="n">answer</span><span class="o">;</span>
+  <span class="o">}</span>
+
+  <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+    <span class="n">봉우리</span> <span class="no">T</span> <span class="o">=</span> <span class="k">new</span> <span class="n">봉우리</span><span class="o">();</span>
+    <span class="nc">BufferedReader</span> <span class="n">br</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">BufferedReader</span><span class="o">(</span><span class="k">new</span> <span class="nc">InputStreamReader</span><span class="o">(</span><span class="nc">System</span><span class="o">.</span><span class="na">in</span><span class="o">));</span>
+    <span class="kt">int</span> <span class="n">n</span> <span class="o">=</span> <span class="nc">Integer</span><span class="o">.</span><span class="na">parseInt</span><span class="o">(</span><span class="n">br</span><span class="o">.</span><span class="na">readLine</span><span class="o">());</span>
+    <span class="kt">int</span><span class="o">[][]</span> <span class="n">arr</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">int</span><span class="o">[</span><span class="n">n</span><span class="o">][</span><span class="n">n</span><span class="o">];</span>
+    <span class="nc">StringTokenizer</span> <span class="n">st</span><span class="o">;</span>
+    <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+      <span class="n">st</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">StringTokenizer</span><span class="o">(</span><span class="n">br</span><span class="o">.</span><span class="na">readLine</span><span class="o">());</span>
+      <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">n</span><span class="o">;</span> <span class="n">j</span><span class="o">++)</span> <span class="o">{</span>
+        <span class="n">arr</span><span class="o">[</span><span class="n">i</span><span class="o">][</span><span class="n">j</span><span class="o">]</span> <span class="o">=</span> <span class="nc">Integer</span><span class="o">.</span><span class="na">parseInt</span><span class="o">(</span><span class="n">st</span><span class="o">.</span><span class="na">nextToken</span><span class="o">());</span>
+      <span class="o">}</span>
+    <span class="o">}</span>
+    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="no">T</span><span class="o">.</span><span class="na">solution</span><span class="o">(</span><span class="n">n</span><span class="o">,</span> <span class="n">arr</span><span class="o">));</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h2 id="4-임시반장-정하기">4. 임시반장 정하기</h2>
+
+<p>많이 헤맸던 문제.</p>
+
+<h3 id="문제">문제</h3>
+
+<p>김갑동 선생님은 올해 6학년 1반 담임을 맡게 되었다. <br />
+김갑동 선생님은 우선 임시로 반장을 정하고 학생들이 서로 친숙해진 후에 정식으로 선거를 통해 반장을 선출하려고 한다. <br />
+그는 자기반 학생 중에서 1학년부터 5학년까지 지내오면서 한번이라도 같은 반이었던 사람이 가장 많은 학생을 임시 반장으로 정하려 한다.
+그래서 김갑동 선생님은 각 학생들이 1학년부터 5학년까지 몇 반에 속했었는지를 나타내는 표를 만들었다. <br />
+예를 들어 학생 수가 5명일 때의 표를 살펴보자.</p>
+
+<p><img src="https://cote.inflearn.com/public/upload/f8a83920ca.jpg" alt="Image1.jpg" /></p>
+
+<p>위 경우에 4번 학생을 보면 3번 학생과 2학년 때 같은 반이었고, 3번 학생 및 5번 학생과 3학년 때 같은 반이었으며, <br />
+2번 학생과는 4학년 때 같은 반이었음을 알 수 있다. 그러므로 이 학급에서 4번 학생과 한번이라도 <br />
+같은 반이었던 사람은 2번 학생, 3번 학생과 5번 학생으로 모두 3명이다. <br />
+이 예에서 4번 학생이 전체 학생 중에서 같은 반이었던 학생 수가 제일 많으므로 임시 반장이 된다.  <br />
+각 학생들이 1학년부터 5학년까지 속했던 반이 주어질 때, 임시 반장을 정하는 프로그램을 작성하시오.</p>
+
+<h4 id="입력">입력</h4>
+
+<p>첫째 줄에는 반의 학생 수를 나타내는 정수가 주어진다. 학생 수는 3 이상 1000 이하이다. <br />
+둘째 줄부터는 1번 학생부터 차례대로 각 줄마다 1학년부터 5학년까지 몇 반에 속했었는지를 나타내는 5개의 정수가 빈칸 하나를 사이에 두고 주어진다. <br />
+주어지는 정수는 모두 1 이상 9 이하의 정수이다.</p>
+
+<h4 id="출력">출력</h4>
+
+<p>첫 줄에 임시 반장으로 정해진 학생의 번호를 출력한다. <br />
+단, 임시 반장이 될 수 있는 학생이 여러 명인 경우에는 그 중 가장 작은 번호만 출력한다.</p>
+
+<p>예시 입력 1</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>5
+2 3 1 7 3
+4 1 9 6 8
+5 5 2 4 4
+6 5 2 6 7
+8 4 2 2 2
+</code></pre></div></div>
+
+<p>문제 출처 : https://www.inflearn.com/course/%EC%9E%90%EB%B0%94-%EC%95%8C%EA%B3%A0%EB%A6%AC%EC%A6%98-%EB%AC%B8%EC%A0%9C%ED%92%80%EC%9D%B4-%EC%BD%94%ED%85%8C%EB%8C%80%EB%B9%84/lecture/72729?</p>
+
+<p>이 문제는 이미 카운트를 한 학생인지 확인하는 부분이 어려웠다. <br />
+처음에 설계를 할 때, 가장 바깥 for문에 학년을 넣고 각 학년 별로 같은 반이면 <br />
+그 학생 인덱스의 리스트에 친구 인덱스를 넣어주게 끔 설계를 했었다.</p>
+
+<p>(시도)<strong>i학년에 j학생 j학생이 같은 반인지를 확인해서 저장해 주려 했다.</strong><br />
+예를 들어, 2학년이라면 2학년 때  (i=1), j학생과 k 학생이 같으면 j 의 리스트에 k를 넣고 k리스트에 j 를 넣는 느낌. (혹은 같은 반이었다고 마킹하는 배열이 필요했을 것 ) <br />
+이렇게 설계를 하니 저장을 한 학생마다 리스트가 필요했고 (혹은 같은 반 이었다는걸 마킹하는 이중배열) 풀이 과정이 복잡해 졌다. <br />
+그래서 풀이를 보니 <strong>i 학생이 j 학생들과 k학년 동안</strong> 같은 반이었던 <strong>친구 수를 카운트</strong>를 했다. <br />
+예를 들어 3번 학생은</p>
+
+<ul>
+  <li>1번 학생과 1학년~5학년 검사 같은 반인 적이 없음 (j++)</li>
+  <li>2번학생과 1학년~5학년 검사  같은 반인 적 없음 (j++)</li>
+  <li>본인 패스(해도 되고 안 해도 되고)</li>
+  <li>4번 학생과 1 x 2학년 때 같은 반 cnt++  <strong>이미 한 번 같은 반 이니까 break</strong></li>
+  <li>5번 학생과 1 x , 2 x 3학년 때 같은 반 cnt++ <strong>이미 한 번 같은 반 이니까 break</strong></li>
+</ul>
+
+<p>그러면 3번 학생은 같은 반인 친구가 2명(cnt)이 있다 <br />
+여기서 임시반장을 뽑는 거니까 max와 몇번 학생인지 비교하면서 max 보다 크면 그 학생 인덱스를 answer 변수에 저장하고 카운트를 max에 넣어주면 된다.</p>
+
+<blockquote>
+  <p>이 문제를 풀면서 for문 작성 시 문제에 맞게 설계하고, 무엇을 순회할지 정하는게 중요함을 배울 수 있었다. <br />
+다음에 비슷한 유형의 문제 풀때는 뭐랑 뭐를 순회하며 비교할지, 어떤 값을 저장하면 좋을지 고민하고 해결해 보자. <br />
+그리고 단순하게 생각하자</p>
+</blockquote>
+
+:ET

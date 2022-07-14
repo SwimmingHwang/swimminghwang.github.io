@@ -1,0 +1,83 @@
+I"�<blockquote>문제</blockquote>
+<p><a href="https://www.acmicpc.net/problem/6118">숨바꼭질</a></p>
+
+<p><img src="/Users/sooyoung/SwimmingHwang.github.io/img/image-20220217004206535.png" alt="image-20220217004206535" /></p>
+
+<p>사용 언어 : <code class="language-plaintext highlighter-rouge">python3</code>    <br />
+개념 : 최단경로, 다익스트라 알고리즘</p>
+
+<blockquote>최단경로</blockquote>
+
+<h4 id="-내-풀이">&gt; 내 풀이</h4>
+
+<p><strong>핵심</strong> <br />
+1) 최단 경로 알고리즘 - 다익스트라
+	- 1에서 출발하여 경로가 제일 긴 정점 구하기, 긴 정점까지의 거리 구하기, 그 거리와 같은 정점들 구하기 -&gt; distance array 꼭 필요 <br />
+2) 인접리스트로 구현</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">heapq</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="nb">input</span> <span class="o">=</span> <span class="n">sys</span><span class="p">.</span><span class="n">stdin</span><span class="p">.</span><span class="n">readline</span>
+<span class="n">INF</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">1e9</span><span class="p">)</span>
+
+<span class="n">n</span><span class="p">,</span> <span class="n">m</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">input</span><span class="p">().</span><span class="n">split</span><span class="p">())</span>
+
+<span class="n">graph</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+<span class="n">distance</span> <span class="o">=</span> <span class="p">[</span><span class="n">INF</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">m</span><span class="p">):</span> <span class="c1"># 인접행렬 방식   
+</span>
+    <span class="n">a_i</span><span class="p">,</span> <span class="n">b_i</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">input</span><span class="p">().</span><span class="n">split</span><span class="p">())</span>
+    <span class="n">graph</span><span class="p">[</span><span class="n">a_i</span><span class="p">].</span><span class="n">append</span><span class="p">((</span><span class="n">b_i</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">graph</span><span class="p">[</span><span class="n">b_i</span><span class="p">].</span><span class="n">append</span><span class="p">((</span><span class="n">a_i</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">dijkstra</span><span class="p">(</span><span class="n">start</span><span class="p">):</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">heapq</span><span class="p">.</span><span class="n">heappush</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">start</span><span class="p">))</span>  <span class="c1"># cost, vertex
+</span>    
+    <span class="n">distance</span><span class="p">[</span><span class="n">start</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="k">while</span> <span class="n">q</span><span class="p">:</span>
+        <span class="n">dist</span><span class="p">,</span> <span class="n">now</span> <span class="o">=</span> <span class="n">heapq</span><span class="p">.</span><span class="n">heappop</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">distance</span><span class="p">[</span><span class="n">now</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">dist</span><span class="p">:</span>
+            <span class="k">continue</span>
+         <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">graph</span><span class="p">[</span><span class="n">now</span><span class="p">]:</span>
+            <span class="n">cost</span> <span class="o">=</span> <span class="n">dist</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">cost</span> <span class="o">&lt;</span> <span class="n">distance</span><span class="p">[</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]]:</span>
+                <span class="n">distance</span><span class="p">[</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">cost</span>
+                <span class="n">heapq</span><span class="p">.</span><span class="n">heappush</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="p">(</span><span class="n">cost</span><span class="p">,</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+
+
+<span class="n">dijkstra</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># 첫 번째는 숨어야 하는 헛간 번호를(만약 거리가 같은 헛간이 여러개면 가장 작은 헛간 번호를 출력한다),
+</span>
+
+<span class="c1"># 두 번째는 그 헛간까지의 거리를,
+</span>
+
+<span class="c1"># 세 번째는 그 헛간과 같은 거리를 갖는 헛간의 개수를 출력해야한다.
+</span>
+
+<span class="n">distance</span> <span class="o">=</span> <span class="n">distance</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+<span class="n">maxDistance</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">distance</span><span class="p">)</span>
+
+<span class="k">print</span><span class="p">(</span><span class="n">distance</span><span class="p">.</span><span class="n">index</span><span class="p">(</span><span class="n">maxDistance</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">maxDistance</span><span class="p">,</span> <span class="n">distance</span><span class="p">.</span><span class="n">count</span><span class="p">(</span><span class="n">maxDistance</span><span class="p">))</span></code></pre></figure>
+
+<h4 id="-배운-점">&gt; 배운 점</h4>
+<ol>
+  <li>리스트에서 최대값의 index를 구하려면
+    <ul>
+      <li>list.index(max_val)</li>
+    </ul>
+  </li>
+  <li>리스트에서 원소의 갯수 구하려면
+    <ul>
+      <li>list.count(elem)</li>
+    </ul>
+  </li>
+</ol>
+
+:ET

@@ -1,0 +1,270 @@
+---
+layout:     post
+title:      Comparable과 Comparator 알아보기
+author:     Soo-young Hwang
+tags: 		JAVA
+category:
+published: true
+---
+### Comparable과 Comparator 알아보기
+
+- **<u>객체</u>**(Reference type)를 비교할 수 있도록 해 준다
+  - primitive type의 int, double, float, char.. 등은 부등호를 가지고 쉽게 비교를 할 수 있는 반면 객체는 어떠한 기준으로 비교할 지 구현을 해 줘야 한다.
+
+- **<u>보통 객체를 어떠한 기준으로 정렬</u>**을 하고자 할 때 메소드를 재정의(override) 해 사용한다
+- Comparable과 Comparator는 모두 interface
+  - Comparable java.lang
+    - `Comparable` 인터페이스에는 `compareTo(T o)` 메소드 하나가 선언되어있는 것을 볼 수 있다. 이 말은 우리가 만약 `Comparable`을 사용하고자 한다면` compareTo` 메소드를 재정의(Override/구현)을 해주어야 한다는 것이다.
+    - https://docs.oracle.com/javase/8/docs/api/java/lang/Comparable.html#method.summary
+  - Comparator java.util
+    - `Comparator`를 보면 선언 된 메소드가 많아서 어질할 수 있겠지만, 우리가 실질적으로 구현해야 하는 것은 단 하나다. 바로 `compare(T o1, T o2)` 다.
+    - https://docs.oracle.com/javase/8/docs/api/java/util/Comparator.html#method.summary
+
+
+
+<blockquote> 참고) 구현이 필요한 이유는?</blockquote>
+
+- abstract method 여서 구현이 필요
+- Comparator의 경우 함수가 더 많은 것을 볼 수 있다. compare을 제외한 나머지는 static 함수로 제공함. 아래의 Comparator.comparing 이 static 함수 중 하나
+- 참고) <u>default나 static으로 선언된 메소드가 아니면 이는 abstract method (추상메소드라)는 의미로 반드시 재정의를 해주어야 한다는 것이다.</u>
+  여담으로 default와 static의 차이라면 default로 선언된 메소드는 재정의(Override)를 할 수 있고, static은 재정의를 할 수 없다는 차이다.
+
+
+
+##### 비교 테이블
+
+|               | Comparable                        | Comaparator             |
+| ------------- | --------------------------------- | ----------------------- |
+|               | interface                         | interface               |
+| 패키지        | java.lang                         | java.util               |
+| override 함수 | compareTo(T o)                    | compare(T o1, T o2)     |
+| 역할 차이     | 자기 자신과 매개 변수 객체를 비교 | 두 배개변수 객체를 비교 |
+
+
+
+##### Comparable 활용 예제
+
+- 자기 자신과 매새변수를 비교
+- compareTo 메소드 구현
+
+```java
+Student a = new Student(17, 2);	// 17살 2반
+Student b = new Student(18, 1);	// 18살 1반
+
+int isBig = a.compareTo(b);	// a자기자신과 b객체를 비교한다.
+```
+
+```java
+class Student implements Comparable<Student> {
+
+	int age;			// 나이
+	int classNumber;	// 학급
+
+	Student(int age, int classNumber) {
+		this.age = age;
+		this.classNumber = classNumber;
+	}
+
+	@Override
+	public int compareTo(Student o) {
+		/*
+		 * 만약 자신의 age가 o의 age보다 크다면 양수가 반환 될 것이고,
+		 * 같다면 0을, 작다면 음수를 반환할 것이다.
+		 */
+		return this.age - o.age;
+	}
+}
+```
+
+- 문제점 뺄셈 과정에서 자료형의 범위를 넘어버리는 경우가 발생할 수 있음
+  -> compareTo를 구현하거나, 이후 설명 할 compare을 구현 할 때 대소비교에 있어 이러한 Overflow 혹은, Underflow가 발생할 여지가 있는지를 반드시 확인하고 사용해야 한다.
+
+  특히 <u>**primitive 값에 대해 위와 같은 예외를 만약 확인하기 어렵다면 <, >, == 으로 대소비교를 해주는 것이 안전**</u>하며 일반적으로 권장되는 방식이다.
+
+  ```java
+  	@Override
+  	public int compareTo(Student o) {
+
+  		// 자기자신의 age가 o의 age보다 크다면 양수
+  		if(this.age > o.age) {
+  			return 1;
+  		}
+  		// 자기 자신의 age와 o의 age가 같다면 0
+  		else if(this.age == o.age) {
+  			return 0;
+  		}
+  		// 자기 자신의 age가 o의 age보다 작다면 음수
+  		else {
+  			return -1;
+  		}
+  	}
+  ```
+
+
+
+##### Comparator 활용 예제
+
+- 두 매개변수 객체를 비교
+- compare 메소드 구현
+
+```java
+Student a = new Student(17, 2);	// 17살 2반
+Student b = new Student(18, 1);	// 18살 1반
+Student c = new Student(15, 3);	// 15살 3반
+
+// a객체와는 상관 없이 b와 c객체를 비교한다.
+int isBig = a.compare(b, c);
+```
+
+```java
+import java.util.Comparator;	// import 필요
+
+class Student implements Comparator<Student> {
+
+	int age;			// 나이
+	int classNumber;	// 학급
+
+	Student(int age, int classNumber) {
+		this.age = age;
+		this.classNumber = classNumber;
+	}
+
+	@Override
+	public int compare(Student o1, Student o2) {
+
+		/*
+		 * 만약 o1의 classNumber가 o2의 classNumber보다 크다면 양수가 반환 될 것이고,
+		 * 같다면 0을, 작다면 음수를 반환할 것이다.
+		 */
+		return o1.classNumber - o2.classNumber;
+	}
+}
+```
+
+
+
+Comparator 의 경우 아래 처럼 어떤 객체를 호출하던 b,c 를 비교하는 것은 변함이 없다.
+하지만 이러한 코드는 일관성이 떨어진다.
+
+```java
+int isBig = a.compare(b, c);
+int isBig2 = b.compare(b, c);
+int isBig3 = c.compare(b, c);
+```
+
+그래서 comparator 비교 기능만 따로 둬 사용할 수 있는 **<u>"Anonymous class (익명 class)"</u>**
+
+- 이름이 정의되지 않은 객체
+
+Comparator 의 기능만 사용하고 싶은 것이다. 즉, Comparator의 구현을 통해 compare 만 사용하고 싶은 것이라는 뜻이다.
+
+
+
+##### 익명 함수를 활용해  compare 만 사용 예제
+
+```java
+import java.util.Comparator;
+
+public class Test {
+	public static void main(String[] args) {
+
+    Student a = new Student(17, 2);	// 17살 2반
+    Student b = new Student(18, 1);	// 18살 1반
+    Student c = new Student(15, 3);	// 15살 3반
+
+    // 학급 기준 익명객체를 통해 b와 c객체를 비교한다.
+    int classBig = comp2.compare(b, c);
+
+		// 익명 객체 구현방법 1
+		Comparator<Student> comp1 = new Comparator<Student>() {
+			@Override
+			public int compare(Student o1, Student o2) {
+				return o1.classNumber - o2.classNumber;
+			}
+		};
+	}
+
+	// 익명 객체 구현방법 2
+	public static Comparator<Student> comp2 = new Comparator<Student>() {
+		@Override
+		public int compare(Student o1, Student o2) {
+			return o1.classNumber - o2.classNumber;
+		}
+	};
+}
+
+
+// 외부에서 익명 객체로 Comparator가 생성되기 때문에 클래스에서 Comparator을 구현 할 필요가 없어진다.
+class Student {
+
+	int age;			// 나이
+	int classNumber;	// 학급
+
+	Student(int age, int classNumber) {
+		this.age = age;
+		this.classNumber = classNumber;
+	}
+
+}
+```
+
+### 기타1 - 정렬 알고리즘에 사용되는 compare, compareTo
+
+- `Arrays.sort()`, `Collections.sort()` 메소드 모두 오름차순을 기준으로 정렬이 된다. 음수가 나오면 두 원소의 위치를 바꾸지 않는다)
+
+  - **음수**일 경우 : 두 원소의 위치를 **교환 안함**
+
+    **양수**일 경우 : 두 원소의 위치를 **교환 함**
+
+  - 내림차 순으로 정렬을 하고 싶다면, 부호를 바꿔주면 된다
+
+    ```java
+    // Comparable
+    public int compareTo(MyClass o) {
+    	return o.value - this.value;	// == -(this.value - o.value);
+    }
+
+    // Comparator
+    public int compare(Myclass o1, MyClass o2) {
+    	return o2.value - o1.value;		// == -(o1.value - o2.value);
+    }
+    ```
+
+### 기타2 - String 클래스
+
+- String 클래스는 Comaparable 을 implements 하여 compareTo(T o) 를 구현하고 있다
+
+```java
+public final class String
+    implements java.io.Serializable, Comparable<String>, CharSequence {
+  ...
+        public int compareTo(String anotherString) {
+        int len1 = value.length;
+        int len2 = anotherString.value.length;
+        int lim = Math.min(len1, len2);
+        char v1[] = value;
+        char v2[] = anotherString.value;
+
+        int k = 0;
+        while (k < lim) {
+            char c1 = v1[k];
+            char c2 = v2[k];
+            if (c1 != c2) {
+                return c1 - c2;
+            }
+            k++;
+        }
+        return len1 - len2;
+    }
+}
+```
+
+
+
+객체의 비교(순서)를 정의하는 것은 반드시 알아두어야 할 내용 중 하나인데, 이번 포스트를 작성하면서 제대로 이해할 수 있었다.
+특히 Comparable과 Comparator의 차이점 또한 명확하게 이해해 볼 수 있었다.
+
+
+#### 참고사이트
+
+comparable과 comparator : [https://st-lab.tistory.com/243](https://st-lab.tistory.com/243)

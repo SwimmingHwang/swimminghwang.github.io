@@ -1,0 +1,20 @@
+I"�<h3 id="서론">서론</h3>
+<p>이번 포스트는 <a href="https://swimminghwang.github.io/study/2020/05/22/dl-lec03/">지난 포스트</a>에 이어 tensorflow version 2.1.0 바탕으로 실습을 했습니다.  <br />
+코드는 <a href="https://github.com/hunkim/DeepLearningZeroToAll/blob/master/tf2/tf2-03-1-minimizing_cost_show_graph.py">링크</a>를 참고했습니다.</p>
+
+<ul>
+  <li>참고) 본론 내용은 <code class="language-plaintext highlighter-rouge">jupyter notebook</code> 파일로 기술했습니다.</li>
+</ul>
+
+<h3 id="본론">본론</h3>
+
+<h4 id="목차">목차</h4>
+
+<ol>
+  <li>Sequential 모델(graph) 생성</li>
+  <li>Train 준비</li>
+  <li>Train</li>
+  <li>Predict 예측</li>
+</ol>
+
+:ET

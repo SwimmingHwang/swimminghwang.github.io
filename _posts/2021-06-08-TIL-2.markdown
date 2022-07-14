@@ -1,0 +1,86 @@
+---
+layout:     post
+title:      javascript 에서 zip  → spring boot multipart file unzip 
+author:     Soo-young Hwang
+tags: 		JSZip 
+subtitle:  	
+category:   study
+---
+
+#### 라이브러리 github
+[https://github.com/Stuk/jszip/tree/master/dist](https://github.com/Stuk/jszip/tree/master/dist)
+
+
+#### 웹단 코드 
+```jsx
+$.getScript("/js/vendor/jszip.js")
+$.getScript("/js/vendor/jszip.min.js")
+```
+
+```jsx
+//업로드 파일 zip
+sendCommon.targetFileZip(mtSend.targetJson, mtSend.targetFileList[0].name).then(res=> {
+  mtSend.zipblob =res
+});
+```
+
+```jsx
+targetFileZip (targetJson,fileName){
+  return new Promise(resolve=> {
+		letcontent = "[\n" +
+		targetJson.map(entry=> JSON.stringify(entry)).join(",\n") +
+		        "\n]";
+		letzip = new JSZip();
+		    zip.file(fileName+'.txt', content,{
+		      compression: "DEFLATE", compressionOptions: { level: 1}});
+		    zip.generateAsync({type:'blob'})
+		    .then (function(blob) {
+		blob.name =fileName+'.txt.zip'
+		resolve(blob)
+		    })
+  })
+}
+```
+
+#### 백단 코드
+
+```java
+publicList<String> saveFile(MultipartFile[]targetFileList)
+    throwsCustomException{
+    List<String> targetFileNameList = new ArrayList<>();
+
+    ...
+
+    StringBuildertargetFileName = new StringBuilder(dirName).append("/").append(fileName, 0, fileName.length()-4);
+    StringBuilderfilePath = new StringBuilder(basePath).append("/").append(targetFileName);
+
+    try {
+        ZipInputStreaminputStream = new ZipInputStream(mf.getInputStream());
+        Pathpath =Paths.get(basePath + "/" + dirName + "/");
+            for (ZipEntryentry; (entry = inputStream.getNextEntry()) != null; ) {
+                PathresolvedPath = path.resolve(filePath.toString());
+                if (!entry.isDirectory()) {
+                    Files.createDirectories(resolvedPath.getParent());
+                    Files.copy(inputStream, resolvedPath);
+                } else {
+                    Files.createDirectories(resolvedPath);
+            }
+        }
+        } catch (IOExceptione){
+            throw new CustomException(HttpStatus.INTERNAL_SERVER_ERROR, 123, "파일 업로드 실패");
+        }
+        targetFileNameList.add(targetFileName.toString());
+    }
+  return targetFileNameList;
+}
+```
+
+웹에서 json 파일을 txt 파일로 저장해서 서버로 저장하는 과정에서 ㅅ엑셀파일보다 텍스트 파일의 용량이 너무 컸다.  이문제를 해결하려고 압축해서 전송하고 unzip하려했는데, 
+
+생각보다 zip하는데 성능이 안 좋았다. 
+
+java에서 unzip의 성능은 괜찮았는데 자바스크립트 단에서 속도가 너무 안 났다. (29MB 를 zip 하는데 5초 이상 걸렸다)
+
+JSzip  라이브러리에 성능 문제가 존재 했다. 라이브러리를 이용해 구현할 때 라이브러리의 성능 또한 고려해야 함을 배웠다. 
+
+[https://stuk.github.io/jszip/documentation/limitations.html](https://stuk.github.io/jszip/documentation/limitations.html)

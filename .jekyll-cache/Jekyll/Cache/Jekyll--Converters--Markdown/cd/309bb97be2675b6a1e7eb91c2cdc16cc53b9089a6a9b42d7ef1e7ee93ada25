@@ -1,0 +1,102 @@
+I"�#<h1 id="array-를-활용한-문제-풀이">Array 를 활용한 문제 풀이</h1>
+
+<ul>
+  <li>Array 기초 문제를 풀면서 알게 된 함수나 개념을 기술한다.</li>
+</ul>
+
+<h2 id="1-소수-찾기">1. 소수 찾기</h2>
+
+<blockquote>
+  <p>[설명]
+자연수 N이 입력되면 1부터 N까지의 소수의 개수를 출력하는 프로그램을 작성하세요.
+만약 20이 입력되면 1부터 20까지의 소수는 2, 3, 5, 7, 11, 13, 17, 19로 총 8개입니다.</p>
+
+  <p>[입력]
+첫 줄에 자연수의 개수 N(2&lt;=N&lt;=200,000)이 주어집니다.</p>
+
+  <p>[출력]
+첫 줄에 소수의 개수를 출력합니다.</p>
+</blockquote>
+
+<ul>
+  <li>소수를 구하는 방법론 중 가장 빠른 에라토스테네스의 체 활용
+    <ul>
+      <li>2부터 소수를 구하고자 하는 구간의 모든 수를 나열한다. 그림에서 회색 사각형으로 두른 수들이 여기에 해당한다.</li>
+      <li>2는 소수이므로 오른쪽에 2를 쓴다.</li>
+      <li><strong>자기 자신을 제외한</strong> 2의 배수를 모두 지운다.</li>
+      <li><strong>남아있는 수 가운데</strong> 3은 소수이므로 오른쪽에 3을 쓴다.</li>
+      <li><strong>자기 자신을 제외한</strong> 3의 배수를 모두 지운다.</li>
+      <li><strong>남아있는 수 가운데</strong> 5는 소수이므로 오른쪽에 5를 쓴다.</li>
+      <li><strong>자기 자신을 제외한 5</strong>의 배수를 모두 지운다.</li>
+      <li><strong>남아있는 수 가운데</strong> 7은 소수이므로 오른쪽에 7을 쓴다.</li>
+      <li><strong>자기 자신을 제외한</strong> 7의 배수를 모두 지운다.</li>
+      <li><strong>위의 과정을 반복하면 구하는 구간의 모든 소수가 남는다.</strong></li>
+      <li>출처 : https://ko.wikipedia.org/wiki/%EC%97%90%EB%9D%BC%ED%86%A0%EC%8A%A4%ED%85%8C%EB%84%A4%EC%8A%A4%EC%9D%98_%EC%B2%B4</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="kd">private</span> <span class="kt">int</span> <span class="nf">solution</span><span class="o">(</span><span class="kt">int</span> <span class="n">n</span><span class="o">)</span> <span class="o">{</span>
+    <span class="kt">int</span> <span class="n">answer</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+
+    <span class="kt">int</span><span class="o">[]</span> <span class="n">ch</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">int</span><span class="o">[</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="o">];</span>
+    <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">2</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">n</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+      <span class="k">if</span> <span class="o">(</span><span class="n">ch</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span> <span class="c1">// 소수다</span>
+        <span class="n">answer</span><span class="o">++;</span>
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="n">i</span><span class="o">;</span> <span class="n">j</span> <span class="o">&lt;=</span> <span class="n">n</span><span class="o">;</span> <span class="n">j</span> <span class="o">=</span> <span class="n">j</span> <span class="o">+</span> <span class="n">i</span><span class="o">)</span> <span class="n">ch</span><span class="o">[</span><span class="n">j</span><span class="o">]</span> <span class="o">=</span> <span class="mi">1</span><span class="o">;</span> <span class="c1">// 소수의 배수 마킹</span>
+      <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="k">return</span> <span class="n">answer</span><span class="o">;</span>
+  <span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="2-숫자-뒤집기">2. 숫자 뒤집기</h2>
+
+<blockquote>
+  <p>해당 문제는 정수 배열을 입력받아 뒤집은 후에 소수인 값을 골라내는 문제이다.</p>
+
+  <p>여기서는 정수를 뒤집는 방법을 정리한다.</p>
+</blockquote>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">isPrime</span><span class="o">(</span><span class="kt">int</span> <span class="n">num</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">num</span> <span class="o">==</span> <span class="mi">1</span><span class="o">)</span> <span class="k">return</span> <span class="kc">false</span><span class="o">;</span>
+    <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">2</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">num</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span> <span class="c1">// 2 부터 자기 숫자 전까지 약수가 존재하면 소수가 아니다</span>
+      <span class="k">if</span> <span class="o">(</span><span class="n">num</span> <span class="o">%</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span> <span class="k">return</span> <span class="kc">false</span><span class="o">;</span>
+    <span class="o">}</span>
+    <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
+  <span class="o">}</span>
+
+  <span class="kd">public</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="nf">solution</span><span class="o">(</span><span class="kt">int</span> <span class="n">n</span><span class="o">,</span> <span class="kt">int</span><span class="o">[]</span> <span class="n">arr</span><span class="o">)</span> <span class="o">{</span>
+    <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">answer</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;&gt;();</span>
+
+    <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+      <span class="kt">int</span> <span class="n">tmp</span> <span class="o">=</span> <span class="n">arr</span><span class="o">[</span><span class="n">i</span><span class="o">];</span> <span class="c1">// 뒤집으려는 숫자 </span>
+      <span class="kt">int</span> <span class="n">res</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="c1">// 뒤집힌 결과 값</span>
+      <span class="k">while</span> <span class="o">(</span><span class="n">tmp</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">res</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">+</span> <span class="n">tmp</span> <span class="o">%</span> <span class="mi">10</span><span class="o">;</span>
+        <span class="n">tmp</span> <span class="o">/=</span> <span class="mi">10</span><span class="o">;</span>
+      <span class="o">}</span>
+      <span class="k">if</span> <span class="o">(</span><span class="n">isPrime</span><span class="o">(</span><span class="n">res</span><span class="o">))</span> <span class="n">answer</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">res</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="k">return</span> <span class="n">answer</span><span class="o">;</span>
+  <span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>뒤집으려는 정수가 1230 이면 tmp = 1230 으로 시작한다</li>
+  <li>1230이 0, 3, 32, 321 순으로 뒤집어진다</li>
+  <li>원래 숫자(뒤집기 전) 숫자에서
+일의 자리값이 열배가 세 번 반복되어 천의 자리가 되고
+십의 자리 값이 나머지 연산으로 일의자리에 세팅이 된 후 (tmp%10) 열배가 두 번 반복되어 백의 자리가 되는 방식으로 뒤집는다.
+    <ul>
+      <li>0 = 0 * 10 + 0</li>
+      <li>3 = 0 * 10 + 3</li>
+      <li>32 = 3 * 10 + 2</li>
+      <li>321 = 32 * 10 + 1</li>
+    </ul>
+  </li>
+</ul>
+
+:ET

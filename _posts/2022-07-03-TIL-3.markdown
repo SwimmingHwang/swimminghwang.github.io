@@ -1,0 +1,135 @@
+---
+layout:     post
+title:      Java Problem Solving - String (1)
+author:     Soo-young Hwang
+tags: 		JAVA
+subtitle:  	문자열 기초 문제를 풀면서 알게 된 함수나 개념
+category:   study
+published: true
+---
+
+# String
+
+- 문자열 기초 문제를 풀면서 알게 된 함수나 개념을 기술한다.
+
+## 01. 문자 찾기
+
+> 문자열 String 순회하기
+
+`String str = "string example";`
+
+- String index 접근 함수 : `str.charAt(i)`
+
+- 대문자로 바꾸는 함수 : `str.toUpperCase()`
+- String은 iterable 하지 않아 for-each 사용 시 String을 기반으로 분자배열을 생성한다 : `str.toCharArray()`
+
+
+
+#### 참고 - for each loop
+```java
+for (type var : iterate) {
+  body-of-loop
+}
+```
+
+
+루프를 돌릴 객체를 iterate부분에 넣어주고 각 루프에서 나오는 타입과 {} 안에서 사용할 변수명을 var에 지정해 주면 된다. iterate부분에 들어가는 타입은 당연히 루프를 돌릴수 있는 형태인 **Array나 Collections가 가능하고 Iterable<E>를 상속받은 객체또한 가능**하다.
+
+
+
+## 02. 대소문자 변환
+
+> 입력받은 문자열 대소문자 변환하기
+
+`char[] charArray = new char[5];`
+
+`char c = charArray[0];`
+
+- 배열의 길이는 최초 선언한 값으로 고정되며 인덱스를 통해 데이터에 접근할 수 있다.
+- 문자 c 가 소문자인지 확인하는 함수 : `Character.isLowerCase(c)`
+- 문자 c 대문자로 변환 함수 : `Character.toUpperCase(c)`
+- 대문자 ascii 범위 : 65(A) ~ 90(Z)
+  소문자 ascii 범위 : 97(a) ~ 122(z)
+    - 소문자 char 에서 32를 빼면 대문자가 된다. 반대로 더하면 소문자가 된다
+- char(캐릭터) 형은 사실 정수이기 때문에 +,- 연산자와 정수를 함께 사용하면 정수로 연산처리가 된다.
+  **=> 따라서 정수와 연산 후 연산 결과를 문자로 처리하기 위해서는 char 로 캐스팅을 해 줘야 한다.**
+
+
+
+#### 참고 - String 에 += 연산
+
+String 에 += char 연산이 가능하지만, String 은 immutable(불변) 객체 이므로 새로운 String 이 생성된다. (해결책으로 StringBuilder를 쓴다)
+
+
+
+## 03. 문장 속 단어
+
+> 문장 속에서 가장 긴 단어 찾기
+>
+> *주의: 길이가 동일할 때 제일 앞에 위치한 단어를 답으로 하니 저장한 max Length 값과 비교 시 '같다' 연산은 빼야한다
+
+- 문자열 쪼개기 함수 : `str.split(regex: " ")`
+    - parameter type :  String
+    - 반환값은 : String[]  (String 객체 배열)
+- String 의 길이는 `str.length()`
+  String[] 의 길이는 `strArray.length` (다른 배열도 마찬가지)
+- 가장 작은 int 는 `Integer.MIN_VALUE`
+- 첫번째로 발견한 인덱스를 반환한다. 없으면 -1 을 반환한다 : `str.indexOf(ch)`
+    - `return int`
+- 문자열 인덱스로 자르는 함수 : `str.subString(int beginIndex)`
+
+
+
+## 04. 단어 뒤집기
+
+- 문자열 뒤집는 함수 : `StringBuilder(x).reverse()`
+
+- `Collections.reverse()`
+    - Collectons 클래스 함수
+ 
+```java
+ ArrayList<String> list = new ArrayList<>(Arrays.asList("H", "e", "l", "l", "o"));       
+ System.out.println(list);  // [H, e, l, l, o]      
+  
+ Collections.reverse(list);
+ System.out.println(list);  // [o, l, l, e, H]
+```
+
+    
+
+- **뒤집는 함수 직접 만드는 법**
+
+    - | left index |      |      |      | right index |
+          | ---------- | ---- | ---- | ---- | ----------- |
+      | s          | t    | u    | d    | y           |
+
+      **left index 가 right index 보다 작을 동안**
+      **left index와 right index 에 있는 값 교환**
+
+      교환 후, left index 는 ++, right index 는 --
+
+
+- char Array를 String 으로 변환시켜 주는 함수 : `String.valueOf(ch)`
+    - = `new String(char[])`
+    - valueOf 함수는 String 클래스의 static으로 선언 된 클래스 메소드이다
+
+
+
+## 05. 특정 문자 뒤집기
+
+> 특수문자가 아닌 경우에만 뒤집기
+
+- 알파벳인지 확인하는 함수 : `Character.isAlphabetic(char)`
+
+
+
+## 06. 중복 문자 제거
+
+- 방법 1. indexOf 함수를 이용해 검사하려는 위치의 문자가 이미 앞에서 존재했던 문자라면
+  인덱스와 indexOf의 결과 인덱스가 다름을 이용
+- 방법 2. 중복을 허용하지 않는 Set 자료구조를 이용
+    - LinkedHashSet : element를 추가한 순서를 보장하며 중복을 허용하지 않는다.
+    - HashSet : element를 추가한 순서를 보장하지 않으며 중복을 허용하지 않는다.
+
+
+

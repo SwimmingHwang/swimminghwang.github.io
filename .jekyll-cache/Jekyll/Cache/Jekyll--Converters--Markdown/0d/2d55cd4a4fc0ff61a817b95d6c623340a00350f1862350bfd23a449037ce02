@@ -1,0 +1,171 @@
+I"z3<blockquote>문제</blockquote>
+<p><a href="https://www.acmicpc.net/problem/16916">부분 문자열</a></p>
+
+<p>사용 언어 : <code class="language-plaintext highlighter-rouge">java8</code>    <br />
+개념 : KMP 알고리즘</p>
+
+<h1 id="b16916-kmp-문자열-검색-알고리즘">B16916 KMP 문자열 검색 알고리즘</h1>
+
+<h3 id="시도했던-방법">시도했던 방법</h3>
+
+<p>텍스트의 길이를 N, 패턴의 길이를 M 이라고 했을 때 각 텍스트의 인덱스에 대해 패턴이 일치하는 지 비교하는 방법으로 풀었으면 O(NM) 으로 최대 100만 * 100만이면 시간초과가 난다.</p>
+
+<h3 id="해결법">해결법</h3>
+
+<ul>
+  <li>시간 복잡도가 O(N+M) KMP 알고리즘을 사용한다.
+    <ul>
+      <li>처음에 내가 구현했던 방법은 O(NM)</li>
+    </ul>
+  </li>
+  <li><a href="https://bowbowbow.tistory.com/6">KMP 알고리즘</a>이란?
+    <ul>
+      <li>접두사와 접미사
+        <ul>
+          <li>
+            <p>접두사(prefix)</p>
+
+            <div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nx">b</span>
+  <span class="nx">ba</span>
+  <span class="nx">ban</span>
+  <span class="nx">bana</span>
+  <span class="nx">banan</span>
+  <span class="nx">banana</span>
+</code></pre></div>            </div>
+          </li>
+          <li>
+            <p>접미사(suffix)</p>
+
+            <div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nx">a</span>
+  <span class="nx">na</span>
+  <span class="nx">ana</span>
+  <span class="nx">nana</span>
+  <span class="nx">anana</span>
+  <span class="nx">banana</span>
+</code></pre></div>            </div>
+          </li>
+        </ul>
+      </li>
+      <li>Pi 배열
+        <ul>
+          <li>주어진 문자열의 0~i 까지의 부분 문자열 중에서 prefix == suffix가 될 수 있는 부분 문자열 중에서 가장 긴 것의 길이(이때 prefix가 0~i  까지의 부분 문자열과 같으면 안된다.)</li>
+          <li>예를 들어 ABAABAB 에서 pi 배열은
+            <ul>
+              <li>A → 0</li>
+              <li>AB → 0</li>
+              <li>ABA → 1</li>
+              <li>ABAA → 1</li>
+              <li>ABA<strong>AB</strong> → 2</li>
+              <li>ABA<strong>ABA</strong> → 3</li>
+              <li>ABAAB<strong>AB</strong> → 2</li>
+              <li>[0, 0, 1, 1, 2, 3, 2] 가 된다</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>이 문제를 풀면서 aaaaab 와 aaab 반례를 통해 내 알고리즘으로는 불가능하다고 생각했었는데 이런 고민을 했었다.
+    <ul>
+      <li><strong>ABCDABC</strong>DABEE</li>
+      <li><strong>ABCDABC</strong>E
+        <ul>
+          <li>단순한 방법에서는 밑줄 친 부분만 틀리고 <strong>앞부분은 일치한다는 사실</strong>을 사용하지 않는다.</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>그럼 이를 어떻게 활용할 것인가
+    <ul>
+      <li>01 23 45 67</li>
+      <li><strong>ABCDABC</strong>DABEE</li>
+      <li><strong>ABCDABE</strong></li>
+      <li>제일 첫번째 비교 후 (문제에 따르면 S 의 인덱스가 0, P의 인덱스가 0)
+기존 단순한 방법에 따르면 S인덱스 1, P인덱스 다시 0 부터 비교를 하게 된다.
+하지만 BCD 모두 틀릴 거라는걸 첫번째 비교에서 알 수 있었다 (ABCDAB까지 일치했던 사실을 알고 있으니까)
+        <ul>
+          <li>ABCDABCDABEE → 틀림
+ABCDABE
+            <ul>
+              <li>이 단계에서 패턴이 일치하려면 적어도 pi[5] = 5여야 한다.</li>
+            </ul>
+          </li>
+          <li>건너뛰기.. pi[5] = 2 니까 여기까지 건너뛰기..</li>
+          <li>ABCD<strong>ABCDABEE</strong> ← Pi[5] = 2 (<strong>AB</strong>CD<strong>AB</strong>)
+            <ul>
+              <li>p[5] = 2라는 정보는 접미사 AB가 접두사 AB와 같다는 것을 말하므로 패턴 “ABCDABE”에서 “AB”는 이미 텍스트와 일치함을 알 수  있다. S의 인덱스 6부터 다시 비교를 시작한다.</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li><strong>이렇게 kmp 알고리즘은 틀렸다는 사실이 아니라 조금이라도 일치했었다는 정보에 주목하고 미리 전처리 해둔pi배열을 이용해서 많은 중간 시도를 껑충 건너띌 수 있게 합니다.</strong></li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="구현">구현</h2>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">study</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.io.BufferedReader</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.IOException</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.InputStreamReader</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">B16916</span> <span class="o">{</span>
+  <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+    <span class="nc">BufferedReader</span> <span class="n">br</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">BufferedReader</span><span class="o">(</span><span class="k">new</span> <span class="nc">InputStreamReader</span><span class="o">(</span><span class="nc">System</span><span class="o">.</span><span class="na">in</span><span class="o">));</span>
+    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">print</span><span class="o">(</span><span class="no">KMP</span><span class="o">(</span><span class="n">br</span><span class="o">.</span><span class="na">readLine</span><span class="o">(),</span> <span class="n">br</span><span class="o">.</span><span class="na">readLine</span><span class="o">()));</span>
+  <span class="o">}</span>
+
+  <span class="c1">// O(m)의 시간 복잡도 </span>
+  <span class="kd">public</span> <span class="kd">static</span> <span class="kt">int</span><span class="o">[]</span> <span class="nf">getPi</span><span class="o">(</span><span class="nc">String</span> <span class="n">s1</span><span class="o">)</span> <span class="o">{</span>
+    <span class="kt">int</span><span class="o">[]</span> <span class="n">pi</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">int</span><span class="o">[</span><span class="n">s1</span><span class="o">.</span><span class="na">length</span><span class="o">()];</span>
+    <span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+    <span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">s1</span><span class="o">.</span><span class="na">length</span><span class="o">();</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+      <span class="k">while</span><span class="o">(</span><span class="n">j</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">s1</span><span class="o">.</span><span class="na">charAt</span><span class="o">(</span><span class="n">i</span><span class="o">)</span> <span class="o">!=</span> <span class="n">s1</span><span class="o">.</span><span class="na">charAt</span><span class="o">(</span><span class="n">j</span><span class="o">))</span> <span class="o">{</span> <span class="c1">// 중간 단계 뛰어 넘는 부분</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="n">pi</span><span class="o">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="o">];</span> <span class="c1">// 다르면 j인덱스를 앞으로 당김 </span>
+      <span class="o">}</span>
+      <span class="k">if</span><span class="o">(</span><span class="n">s1</span><span class="o">.</span><span class="na">charAt</span><span class="o">(</span><span class="n">i</span><span class="o">)</span> <span class="o">==</span> <span class="n">s1</span><span class="o">.</span><span class="na">charAt</span><span class="o">(</span><span class="n">j</span><span class="o">))</span> <span class="o">{</span>
+        <span class="n">pi</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">=</span> <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span><span class="o">;</span> <span class="c1">// 같으면 </span>
+      <span class="o">}</span>
+    <span class="o">}</span>
+    <span class="k">return</span> <span class="n">pi</span><span class="o">;</span>
+  <span class="o">}</span>
+
+  <span class="kd">public</span> <span class="kd">static</span> <span class="kt">int</span> <span class="nf">KMP</span><span class="o">(</span><span class="nc">String</span> <span class="n">s</span><span class="o">,</span> <span class="nc">String</span> <span class="n">s1</span><span class="o">)</span> <span class="o">{</span>
+    <span class="kt">int</span><span class="o">[]</span> <span class="n">pi</span> <span class="o">=</span> <span class="n">getPi</span><span class="o">(</span><span class="n">s1</span><span class="o">);</span>
+    <span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+    <span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">s</span><span class="o">.</span><span class="na">length</span><span class="o">();</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+      <span class="k">while</span><span class="o">(</span><span class="n">j</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">s</span><span class="o">.</span><span class="na">charAt</span><span class="o">(</span><span class="n">i</span><span class="o">)</span> <span class="o">!=</span> <span class="n">s1</span><span class="o">.</span><span class="na">charAt</span><span class="o">(</span><span class="n">j</span><span class="o">))</span> <span class="o">{</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="n">pi</span><span class="o">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="o">];</span>
+      <span class="o">}</span>
+      <span class="k">if</span><span class="o">(</span><span class="n">s</span><span class="o">.</span><span class="na">charAt</span><span class="o">(</span><span class="n">i</span><span class="o">)</span> <span class="o">==</span> <span class="n">s1</span><span class="o">.</span><span class="na">charAt</span><span class="o">(</span><span class="n">j</span><span class="o">))</span> <span class="o">{</span>
+        <span class="k">if</span><span class="o">(</span><span class="n">j</span> <span class="o">==</span> <span class="n">s1</span><span class="o">.</span><span class="na">length</span><span class="o">()</span> <span class="o">-</span> <span class="mi">1</span><span class="o">)</span> <span class="o">{</span>
+          <span class="k">return</span> <span class="mi">1</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="k">else</span> <span class="o">{</span>
+          <span class="n">j</span><span class="o">++;</span>
+        <span class="o">}</span>
+      <span class="o">}</span>
+    <span class="o">}</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="o">;</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h3 id="예제-설명">예제 설명</h3>
+<ul>
+  <li>A B A ‘B’ A B A C</li>
+  <li>A B A ‘C’</li>
+  <li>i=3, j=3 일 때  s1에서 0~2(j-1)까지는 일치했던 사실을 알 고 있다.
+    <ul>
+      <li>j = pi[j-1] 일치했는거 아는 위치의 pi배열 값 인덱스 위치로 앞으로 당겨서 거기부터 다시 비교</li>
+      <li>*어차피 불일치할 B부터 다시 비교하는 것이 아닌 다시 A로 시작 하는 지점 으로 위치하고 틀렸던 s의 i=3과 당겨진 s1 의 j와 비교한다</li>
+    </ul>
+  </li>
+  <li>A B A ‘B’ A B A C</li>
+  <li>A ‘B’ A C</li>
+  <li>이게 가능한 이유는, A B A 의 pi 배열을 구해놨는데, 이 pi 배열의 의미가 미리 전처리 해두고 중간의 많은 시도를 건너 뛰게 해 주기 때문이다.</li>
+</ul>
+:ET

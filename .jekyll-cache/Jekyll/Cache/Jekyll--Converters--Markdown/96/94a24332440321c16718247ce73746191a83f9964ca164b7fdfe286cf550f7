@@ -1,0 +1,260 @@
+I"~c<blockquote> Bulk Insert란? </blockquote>
+
+<p>DB에 레코드를 N(N&gt;=2) 삽입 시, insert문을 N번 반복하는 것이 아닌 하나의 Insert문에 N개의 데이터를 담아서 삽입하는 것을 말한다. <br />
+(= Bulk Insert시 <code class="language-plaintext highlighter-rouge">Batch</code> 사이즈를 정해줘야 한다. 그래서 그런지 <code class="language-plaintext highlighter-rouge">Batch Insert</code> 라는 말로 혼용해서 쓰는 듯 하다. )
+아래의 예시를 보면 <strong><code class="language-plaintext highlighter-rouge">Bulk Insert</code></strong>가 뭔지 바로 알 수 있을 것이다. <br />
+​</p>
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">//</span> <span class="err">개별</span> 
+<span class="k">INSERT</span> <span class="k">INTO</span> <span class="n">table1</span> <span class="p">(</span><span class="n">col1</span><span class="p">,</span> <span class="n">col2</span><span class="p">)</span> <span class="k">VALUES</span> <span class="p">(</span><span class="n">val11</span><span class="p">,</span> <span class="n">val12</span><span class="p">);</span>
+<span class="k">INSERT</span> <span class="k">INTO</span> <span class="n">table1</span> <span class="p">(</span><span class="n">col1</span><span class="p">,</span> <span class="n">col2</span><span class="p">)</span> <span class="k">VALUES</span> <span class="p">(</span><span class="n">val21</span><span class="p">,</span> <span class="n">val22</span><span class="p">);</span>
+<span class="k">INSERT</span> <span class="k">INTO</span> <span class="n">table1</span> <span class="p">(</span><span class="n">col1</span><span class="p">,</span> <span class="n">col2</span><span class="p">)</span> <span class="k">VALUES</span> <span class="p">(</span><span class="n">val31</span><span class="p">,</span> <span class="n">val32</span><span class="p">);</span>
+<span class="o">//</span> <span class="n">Bulk</span>
+<span class="k">INSERT</span> <span class="k">INTO</span> <span class="n">table1</span> <span class="p">(</span><span class="n">col1</span><span class="p">,</span> <span class="n">col2</span><span class="p">)</span> <span class="k">VALUES</span>
+<span class="p">(</span><span class="n">val11</span><span class="p">,</span> <span class="n">val12</span><span class="p">),</span>
+<span class="p">(</span><span class="n">val21</span><span class="p">,</span> <span class="n">val22</span><span class="p">),</span>
+<span class="p">(</span><span class="n">val31</span><span class="p">,</span> <span class="n">val32</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>현재 프로젝트에서 JPA 구현체로 <code class="language-plaintext highlighter-rouge">Hibernate</code>를 사용한다. <br />
+<code class="language-plaintext highlighter-rouge">Hibernate</code>를 사용하면서 엔터티의 식별자 생성에 <code class="language-plaintext highlighter-rouge">IDENTITY</code> 방식을 사용했다. <br />
+이는 <code class="language-plaintext highlighter-rouge">Hibernate</code>가 <code class="language-plaintext highlighter-rouge">JDBC</code> 수준에서 <code class="language-plaintext highlighter-rouge">Bulk insert</code>를 비활성화한다.</p>
+
+<p>(출처 : https://homoefficio.github.io/2020/01/25/Spring-Data%EC%97%90%EC%84%9C-Bulk-Insert-%EC%B5%9C%EC%A0%81%ED%99%94/)</p>
+
+<p>결국 <strong><code class="language-plaintext highlighter-rouge">Hibernate</code>에서 <code class="language-plaintext highlighter-rouge">IDENTITY </code>방식으로 식별자를 생성하면 <code class="language-plaintext highlighter-rouge">Bulk insert</code>는 사용할 수 없다.</strong>   ​
+위의 블로그를 참고하니 해결 방법은 2가지다.</p>
+
+<h3 id="1-sequence나-table방식을-사용하면서-채번-부하를-낮추기">1. <code class="language-plaintext highlighter-rouge">Sequence</code>나 <code class="language-plaintext highlighter-rouge">Table</code>방식을 사용하면서 채번 부하를 낮추기</h3>
+<h3 id="2-spring-data-jpa구현체--hibernate-대신-spring-data-jdbc-사용하기">2. <code class="language-plaintext highlighter-rouge">Spring Data JPA</code>(구현체 : Hibernate) 대신 <code class="language-plaintext highlighter-rouge">Spring Data JDBC</code> 사용하기</h3>
+
+<p>​
+1번 방식이 이해가 잘 안가서 관련 내용을 더 찾아봤다. <br />
+<a href="https://gmlwjd9405.github.io/2019/08/12/primary-key-mapping.html">참고사이트</a></p>
+
+<blockquote>기본키 자동 생성 전략</blockquote>
+
+<p>먼저 Spring에서 기본키를 매핑하고 자동 생성 전략을 적용하는 예시를 보자. <br />
+아래는 Spring 에서의 자동 생성 전략 중 <code class="language-plaintext highlighter-rouge">AUTO</code>로 적용한다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Id</span> <span class="c1">// 기본키 매핑</span>
+<span class="nd">@GeneratedValue</span><span class="o">(</span><span class="n">strategy</span> <span class="o">=</span> <span class="nc">GenerationType</span><span class="o">.</span><span class="na">AUTO</span><span class="o">)</span> <span class="c1">// 자동 생성 전략 중 AUTO로 설정</span>
+<span class="kd">private</span> <span class="nc">Long</span> <span class="n">id</span><span class="o">;</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">@Id</code>로 <code class="language-plaintext highlighter-rouge">Entity</code>에서 기본키를 매핑한다. <br />
+<code class="language-plaintext highlighter-rouge">@GeneratedValue</code>를 설정해주지 않으면 데이터 삽입 시 기본키 값을 직접 할당 해야 한다.</p>
+
+<p>​</p>
+
+<p>자동 생성 전략에는 네가지가 있다.</p>
+
+<ol>
+  <li>IDENTITY</li>
+  <li>SEQENCE</li>
+  <li>TABLE</li>
+  <li>AUTO</li>
+</ol>
+
+<p>​</p>
+<ol>
+  <li>IDENTITY</li>
+</ol>
+
+<p>id 값을 null로 하면 DB가 알아서 AUTO_INCREMENT를 해 준다. (MySQL)</p>
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">create</span> <span class="k">table</span> <span class="k">User</span><span class="p">(</span>
+  <span class="n">id</span> <span class="nb">varchar</span><span class="p">(</span><span class="mi">255</span><span class="p">)</span> <span class="n">auto_increment</span><span class="p">,</span>
+  <span class="p">...</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<ol>
+  <li>SEQUENCE
+DB의 Sequence Object를 사용하여 DB가 숫자를 generate해주는 방식이다.  <br />
+MySQL에는 Sequence Object가 없어 Table방식을 사용하게 된다. <br />
+추가적으로, Orable, H2 등 에는 사용가능하다.</li>
+  <li>TABLE
+키 생성 전용 테이블을 하나 만들어 관리를 한다. <br />
+공용 시퀀스 테이블을 두고 모든 테이블의 id sequence를 한 테이블에서 관리한다. <br />
+<code class="language-plaintext highlighter-rouge">@TableGenerator</code> annotation이 필요하다. <br />
+최적화가 되어있지 않다고 한다.</li>
+  <li>AUTO
+기본 시퀀스 전략이며  데이터베이스 벤더가 위의 3가지 방법 중 하나를 선택한다.</li>
+</ol>
+
+<p>​
+다시 돌아와서, <code class="language-plaintext highlighter-rouge">Bulk Insert</code> 을 해 보자.</p>
+
+<ol>
+  <li>Sequence나 Table방식을 사용하면서 채번(sequence)  부하를 낮추기</li>
+  <li>Spring Data JPA(구현체 : Hibernate) 대신 Spring Data JDBC 사용하기</li>
+</ol>
+
+<p>1번 방식을 적용할까 고민을 했다.</p>
+
+<p><a href="https://github.com/HomoEfficio/dev-tips/blob/master/JPA-GenerationType-별-INSERT-성능-비교.md">JPA-GenerationType-별-INSERT-성능-비교</a>  <br />
+<a href="https://homoefficio.github.io/2020/01/25/Spring-Data%EC%97%90%EC%84%9C-Batch-Insert-%EC%B5%9C%EC%A0%81%ED%99%94/">Spring Data에서 Batch Insert 최적화</a></p>
+
+<p>위 포스트에 따르면 Sequence, table 방식을 조치 없이 사용하면 <code class="language-plaintext highlighter-rouge">Bulk Insert</code>를 쓰더라도 <code class="language-plaintext highlighter-rouge">IDENTITY</code> 방식보다 더 느리다고 한다.</p>
+
+<p>그렇다면, Sequence, Table방식을 잘 사용해서 부하를 낮추는 방안을 고민해봐야 한다.<br />
+Spring Data JPA가 안겨주는 편리함 뒤에는 가끔 <strong>성능 손실</strong>이 숨어있다.  <br />
+이번에 알아볼 Bulk Insert도 그런 예 중 하나다. 성능 손실 문제가 발생하는 이유와 2가지 해결 방법을 알아본다.</p>
+
+<p>위의 블로그에서 분석을 잘 해뒀다. 덕분에, Spring Data JDBC 가 가장 빠르다고 결론을 내셨기에, <br />
+이를 적용하기로 했다.(후에 Table방식으로 적용했다)</p>
+
+<p>​</p>
+
+<blockquote>Spring Data JPA(구현체 : Hibernate) 대신 `Spring Data JDBC` 사용하기</blockquote>
+
+<p>프로젝트의 주제 성격상 많은 갯수의 데이터를 Insert하는 경우가 많다. 약 10만 건 이상? (물론 가정이다)  <br />
+배치 크기에 따라 다르지만 이 방식은 Hibernate Bulk Sequence 보다 대략 2~3배 정도 빠르고  <br />
+IDENTITY보다 2~25배 빠르다는 분석이 있다.</p>
+
+<p><code class="language-plaintext highlighter-rouge">JdbcTemplate.BulkUpdate()</code> 라는 메서드를 사용하여 구현해 적용해봤다.<br />
+Bulk Insert가 되는 것을 확인할 수 있었다.</p>
+
+<p><del>그런데, 이미 <code class="language-plaintext highlighter-rouge">GenerationType</code>이 <code class="language-plaintext highlighter-rouge">IDENTITY</code>여서 그런지 개별 INSERT가 되었다.</del> <br />
+<del>-&gt;사실은 로그만 개별로 보였을 뿐 Bulk insert가 되고 있었다. 아래에 해결 과정 기술함.</del></p>
+
+<p>​</p>
+
+<p><code class="language-plaintext highlighter-rouge">Bulk update</code>메서드를 적용한 코드는 아래와 같다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.xxxxx.domain.msgs</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">lombok.RequiredArgsConstructor</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">lombok.extern.slf4j.Slf4j</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.beans.factory.annotation.Value</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.context.annotation.Profile</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.jdbc.core.BulkPreparedStatementSetter</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.jdbc.core.JdbcTemplate</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.stereotype.Repository</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.sql.PreparedStatement</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.sql.SQLException</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.ArrayList</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+
+<span class="nd">@Slf4j</span>
+<span class="nd">@Repository</span>
+<span class="nd">@RequiredArgsConstructor</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">AtMsgsJdbcRepositoryImpl</span> <span class="kd">implements</span> <span class="nc">AtMsgsJdbcRepository</span><span class="o">{</span>
+
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">JdbcTemplate</span> <span class="n">jdbcTemplate</span><span class="o">;</span>
+
+    <span class="kd">private</span> <span class="kt">int</span> <span class="nc">BulkSize</span> <span class="o">=</span> <span class="mi">500</span><span class="o">;</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">saveAll</span><span class="o">(</span><span class="nc">List</span><span class="o">&lt;</span><span class="nc">AtMsgs</span><span class="o">&gt;</span> <span class="n">atMsgs</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kt">int</span> <span class="nc">BulkCount</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+        <span class="nc">List</span><span class="o">&lt;</span><span class="nc">AtMsgs</span><span class="o">&gt;</span> <span class="n">subItems</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;&gt;();</span>
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">atMsgs</span><span class="o">.</span><span class="na">size</span><span class="o">();</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+            <span class="n">subItems</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">atMsgs</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">i</span><span class="o">));</span>
+            <span class="k">if</span> <span class="o">((</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="o">)</span> <span class="o">%</span> <span class="nc">BulkSize</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+                <span class="nc">BulkCount</span> <span class="o">=</span> <span class="nc">BulkInsert</span><span class="o">(</span><span class="nc">BulkSize</span><span class="o">,</span> <span class="nc">BulkCount</span><span class="o">,</span> <span class="n">subItems</span><span class="o">);</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+        <span class="k">if</span> <span class="o">(!</span><span class="n">subItems</span><span class="o">.</span><span class="na">isEmpty</span><span class="o">())</span> <span class="o">{</span>
+            <span class="nc">BulkCount</span> <span class="o">=</span> <span class="nc">BulkInsert</span><span class="o">(</span><span class="nc">BulkSize</span><span class="o">,</span> <span class="nc">BulkCount</span><span class="o">,</span> <span class="n">subItems</span><span class="o">);</span>
+        <span class="o">}</span>
+        <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"BulkCount: "</span> <span class="o">+</span> <span class="nc">BulkCount</span><span class="o">);</span>
+
+    <span class="o">}</span>
+
+    <span class="kd">private</span> <span class="kt">int</span> <span class="nf">BulkInsert</span><span class="o">(</span><span class="kt">int</span> <span class="nc">BulkSize</span><span class="o">,</span> <span class="kt">int</span> <span class="nc">BulkCount</span><span class="o">,</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">AtMsgs</span><span class="o">&gt;</span> <span class="n">atMsgs</span><span class="o">)</span> <span class="o">{</span>
+
+        <span class="n">jdbcTemplate</span><span class="o">.</span><span class="na">BulkUpdate</span><span class="o">(</span><span class="s">"INSERT INTO imc_at (`message`, `phone_number`) VALUES (?, ?)"</span><span class="o">,</span>
+                <span class="k">new</span> <span class="nf">BulkPreparedStatementSetter</span><span class="o">()</span> <span class="o">{</span>
+            <span class="c1">// TODO 직접 insert 하기 때문에 default값 재설정 필요</span>
+                    <span class="nd">@Override</span>
+                    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setValues</span><span class="o">(</span><span class="nc">PreparedStatement</span> <span class="n">ps</span><span class="o">,</span> <span class="kt">int</span> <span class="n">i</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">SQLException</span> <span class="o">{</span>
+                        <span class="n">ps</span><span class="o">.</span><span class="na">setString</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="n">atMsgs</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">i</span><span class="o">).</span><span class="na">getMsg</span><span class="o">());</span>
+                        <span class="n">ps</span><span class="o">.</span><span class="na">setString</span><span class="o">(</span><span class="mi">2</span><span class="o">,</span> <span class="n">atMsgs</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">i</span><span class="o">).</span><span class="na">getPhoneNumber</span><span class="o">());</span>
+                    <span class="o">}</span>
+                    <span class="nd">@Override</span>
+                    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">getBulkSize</span><span class="o">()</span> <span class="o">{</span>
+                        <span class="k">return</span> <span class="n">atMsgs</span><span class="o">.</span><span class="na">size</span><span class="o">();</span>
+                    <span class="o">}</span>
+                <span class="o">});</span>
+        <span class="n">atMsgs</span><span class="o">.</span><span class="na">clear</span><span class="o">();</span>
+        <span class="nc">BulkCount</span><span class="o">++;</span>
+        <span class="k">return</span> <span class="nc">BulkCount</span><span class="o">;</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="겪은-문제들">겪은 문제들</h3>
+<blockquote>Table 방식으로 genertation type변경 후 Bulk insert 안 되는 문제 해결</blockquote>
+
+<p>1번 방식대로 할 때 bulk insert가 되어야 하는데 안 되는 문제가 있었다. <br />
+즉, GenerationType도 테이블로 바꾸고 properties도 다 설정 했는데 자꾸 개별 insert가 되는 문제가 있었다.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Hibernate: select tbl.next_val from hibernate_sequences tbl where tbl.sequence_name=? for update
+Hibernate: update hibernate_sequences set next_val=?  where next_val=? and sequence_name=?
+Hibernate: select tbl.next_val from hibernate_sequences tbl where tbl.sequence_name=? for update
+Hibernate: update hibernate_sequences set next_val=?  where next_val=? and sequence_name=?
+Hibernate: select tbl.next_val from hibernate_sequences tbl where tbl.sequence_name=? for update
+Hibernate: update hibernate_sequences set next_val=?  where next_val=? and sequence_name=?
+Hibernate: select tbl.next_val from hibernate_sequences tbl where tbl.sequence_name=? for update
+Hibernate: update hibernate_sequences set next_val=?  where next_val=? and sequence_name=?
+Hibernate: select tbl.next_val from hibernate_sequences tbl where tbl.sequence_name=? for update
+Hibernate: update hibernate_sequences set next_val=?  where next_val=? and sequence_name=?
+Hibernate: select tbl.next_val from hibernate_sequences tbl where tbl.sequence_name=? for update
+Hibernate: update hibernate_sequences set next_val=?  where next_val=? and sequence_name=?
+Hibernate: select tbl.next_val from hibernate_sequences tbl where tbl.sequence_name=? for update
+Hibernate: update hibernate_sequences set next_val=?  where next_val=? and sequence_name=?
+Hibernate: select tbl.next_val from hibernate_sequences tbl where tbl.sequence_name=? for update
+Hibernate: update hibernate_sequences set next_val=?  where next_val=? and sequence_name=?
+Hibernate: select tbl.next_val from hibernate_sequences tbl where tbl.sequence_name=? for update
+Hibernate: update hibernate_sequences set next_val=?  where next_val=? and sequence_name=?
+Hibernate: insert into imc_at (etc1, message, phone_number, priority, reserved_date, sender_key, status, template_code, id) values (?, ?, ?, ?, ?, ?, ?, ?, ?)
+Hibernate: insert into imc_at (etc1, message, phone_number, priority, reserved_date, sender_key, status, template_code, id) values (?, ?, ?, ?, ?, ?, ?, ?, ?)
+Hibernate: insert into imc_at (etc1, message, phone_number, priority, reserved_date, sender_key, status, template_code, id) values (?, ?, ?, ?, ?, ?, ?, ?, ?)
+Hibernate: insert into imc_at (etc1, message, phone_number, priority, reserved_date, sender_key, status, template_code, id) values (?, ?, ?, ?, ?, ?, ?, ?, ?)
+Hibernate: insert into imc_at (etc1, message, phone_number, priority, reserved_date, sender_key, status, template_code, id) values (?, ?, ?, ?, ?, ?, ?, ?, ?)
+Hibernate: insert into imc_at (etc1, message, phone_number, priority, reserved_date, sender_key, status, template_code, id) values (?, ?, ?, ?, ?, ?, ?, ?, ?)
+Hibernate: insert into imc_at (etc1, message, phone_number, priority, reserved_date, sender_key, status, template_code, id) values (?, ?, ?, ?, ?, ?, ?, ?, ?)
+Hibernate: insert into imc_at (etc1, message, phone_number, priority, reserved_date, sender_key, status, template_code, id) values (?, ?, ?, ?, ?, ?, ?, ?, ?)
+Hibernate: insert into imc_at (etc1, message, phone_number, priority, reserved_date, sender_key, status, template_code, id) values (?, ?, ?, ?, ?, ?, ?, ?, ?)
+</code></pre></div></div>
+
+<p>구글링.. <br />
+(https://stackoverflow.com/questions/21530112/no-matter-what-i-cant-Bulk-mysql-insert-statements-in-hibernate)</p>
+
+<p>No matter what, I can’t Bulk MySQL INSERT statements in Hibernate <br />
+I’m currently facing the well-known and common Hibernate insert Bulk problem. I need to save Bulkes 5 millions of rows long. I’m first trying with a much lighter payload. Since I have to insert</p>
+
+<p>stackoverflow.com
+여기서 답을 찾았다.</p>
+
+<p>Hibernate는 드라이버에 여러 개의 insert문을 보낸다.  <br />
+이 출력된 개별 insert문은 드라이버가 DB에 보낸 SQL이 아니라 <br />
+<strong>SQL Hibernate가 드라이버에 보낸 내용만 보여주는 것이었다.</strong></p>
+
+<p><code class="language-plaintext highlighter-rouge">profileSQL=true</code></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>spring.datasource.url=jdbc:mysql://localhost:3306/db명?serverTimezone=UTC&amp;allowPublicKeyRetrieval=true&amp;useSSL=false&amp;rewriteBulkedStatements=true&amp;profileSQL=true
+rewriteBulkedStatements=true&amp;profileSQL=true
+</code></pre></div></div>
+
+<p>이를 true로 해주면 실제로 DB에서 어떤SQL문이 실행되는지 알 수 있다.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Hibernate: insert into imc_at (etc1, message, phone_number, priority, reserved_date, sender_key, status, template_code, id) values (?, ?, ?, ?, ?, ?, ?, ?, ?)
+Hibernate: insert into imc_at (etc1, message, phone_number, priority, reserved_date, sender_key, status, template_code, id) values (?, ?, ?, ?, ?, ?, ?, ?, ?)
+Hibernate: insert into imc_at (etc1, message, phone_number, priority, reserved_date, sender_key, status, template_code, id) values (?, ?, ?, ?, ?, ?, ?, ?, ?)
+Hibernate: insert into imc_at (etc1, message, phone_number, priority, reserved_date, sender_key, status, template_code, id) values (?, ?, ?, ?, ?, ?, ?, ?, ?)
+Hibernate: insert into imc_at (etc1, message, phone_number, priority, reserved_date, sender_key, status, template_code, id) values (?, ?, ?, ?, ?, ?, ?, ?, ?)
+Sun Nov 22 23:13:39 KST 2020 INFO: [QUERY] insert into imc_at (etc1, message, phone_number, priority, reserved_date, sender_key, status, template_code, id) values ('0', 'aa', '821011111111', 'N', '20201122231300', '54ef196697bda7dbc36a45a334beb83580d8ca2a', '1', 'null', 66),('0', 'aa', '821022222222', 'N', '20201122231300', '54ef196697bda7dbc36a45a334beb83580d8ca2a', '1', 'null', 67),('0', 'aa', '821033333333', 'N', '20201122231300', '54ef196697bda7dbc36a45a334beb83580d8ca2a', '1', 'null', 68),('0', 'aa', '821044444444', 'N', '20201122231300', '54ef196697bda7dbc36a45a334beb83580d8ca2a', '1', 'null', 69),('0', 'aa', '821055555555', 'N', '20201122231300', '54ef196697bda7dbc36a45a334beb83580d8ca2a', '1', 'null', 70) [Created on: Sun Nov 22 23:13:39 KST 2020, duration: 0, connection-id: 7244, statement-id: 0, resultset-id: 0,	at com.zaxxer.hikari.pool.ProxyStatement.executeBulk(ProxyStatement.java:128)]
+</code></pre></div></div>
+
+<p>개별 insert되는 줄 알았지만,,Bulk insert가 잘 되고 있었다. <br />
+하루종일 삽질했다. <br />
+​
+Table 방식으로 배치 insert를 시도했지만 성능에 대한 문제는 더 고민해 봐야한다.<br />
+(Spring Data JDBC가 성능이 제일 좋다고 하기에 JDBC 를 반영했다)
+​</p>
+
+<p>무튼 하루종일 삽질 끝에, 기본키 자동 생성 전략 네가지도 구체적으로 알 수 있었고, <br />
+Bulk insert를 구현하고 적용해 볼 수 있었다.</p>
+:ET

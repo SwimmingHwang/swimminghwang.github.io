@@ -1,0 +1,100 @@
+---
+layout:     post
+title:      프로그래머스) 위장 - 해시
+author:     Soo-young Hwang
+tags: 		Coding-test
+subtitle:   Hash Table 
+category:  study
+---
+
+<blockquote>문제</blockquote>
+[프로그래머스 > 해시 > 위장](https://programmers.co.kr/learn/courses/30/lessons/42578)   
+
+사용 언어 : `python3`      
+개념 : 자료구조 해시 (python - dictionary)   
+
+<blockquote>해시 테이블 (Hash Table)</blockquote>
+
+
+#### > 내 풀이
+
+**핵심**    
+1) 해시를 사용해야 함   
+2) 조합의 수 구하기
+
+
+{% highlight python %}
+def solution(clothes):
+    answer = 0
+    hash = {}
+    for cloth in clothes:
+        print(cloth)
+        if cloth[1] not in hash:
+            hash[cloth[1]] = [(cloth[0])]
+        else:
+            li = []
+            li.extend(hash[cloth[1]])
+            li.append(cloth[0])
+            hash[cloth[1]] = li 
+    
+    combine = 1
+    for h in hash:
+        combine *= (len(hash[h])+1)
+    print(combine)
+        
+    return combine -1
+{% endhighlight %}
+       
+<p><h4> > 다른 풀이</h4></p>
+
+1) `reduce` 함수 사용  
+- `functools` 모듈의 `reduce` 함수
+{% highlight python %}
+>>> def sum(x, y): 
+... return x+y 
+... 
+>>> reduce(sum, [1, 2, 3, 4, 5]) 
+15
+
+{% endhighlight %}
+
+- lamda 를 통해 아래처럼도 표현 가능
+{% highlight python %}
+>>> reduce(lambda x, y: x+y, [1, 2, 3, 4, 5])
+15
+{% endhighlight %}
+
+2) `collections` 모듈의 `Counter` 클래스 사용 
+- `collections`모듈의 `Counter`클래스는 파이썬의 기본 자료구조인 `dictionary`를 확장하고 있기 때문에, 딕셔너리에서 제공하는 API를 그대로 사용할 수 있다.([지난 문제에서도 사용](https://swimminghwang.github.io/study/2020/06/29/ct-001/))
+
+{% highlight python %}
+
+# 1
+
+import collections
+from functools import reduce
+
+def solution(c):
+    return reduce(lambda x,y:x*y,[a+1 for a in collections.Counter([x[1] for x in c]).values()])-1
+
+# 2
+
+def solution(clothes):
+    from collections import Counter
+    from functools import reduce
+    cnt = Counter([kind for name, kind in clothes])
+    answer = reduce(lambda x, y: x*(y+1), cnt.values(), 1) - 1
+    return answer
+{% endhighlight %}   
+   
+     
+
+#### > 배운 점
+- list 쌍 자료형에서 hash로 변환할 때, `for cloth in clothes:` 보다 `for name, kind in clothes` 이렇게 표현하고 사용하는게 가독성이 더 좋다.
+- 직접 딕셔너리 자료형에 key와 value를 삽입하여 hash 자료형을 만들 수 있지만, `Counter`클래스를 사용하여 더 간결하게 hash 자료형을 만들 수 있다. 
+- for문을 통해 직접 곱할 수도 있었지만 reduce함수와 lambda를 이용하면 더 간결하게 코드를 작성할 수 있다.
+
+
+
+### references
+[참고사이트 - reduce함수](https://codepractice.tistory.com/86)

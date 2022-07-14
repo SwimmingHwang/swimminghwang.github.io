@@ -1,0 +1,227 @@
+I"vT<h1 id="spring-boot에-rest-api-설계에-맞는-코드-작성하기--custom-response-설계">Spring Boot에 Rest API 설계에 맞는 코드 작성하기 &amp; Custom Response 설계</h1>
+<p><br /></p>
+
+<h3 id="서론">서론</h3>
+
+<p>회사에서 어드민 사이트를 개발을 시작했었을 무렵이다.<br />
+어드민 말고 서비스 웹 사이트에서 데이터를 수정하는 <code class="language-plaintext highlighter-rouge">Request</code>임에도 불구하고, <code class="language-plaintext highlighter-rouge">PostMapping</code>을 사용한 코드가 몇몇 보였다. <br />
+내가 아닌 다른 사람이 API를 프론트에서 쓰려면 헷갈리고 재사용하는데 어려움을 겪을 수 있다고 생각했다. <br />
+그래서 Rest API 설계에 맞게 고려하여 코드를 작성하고자 했다. <br />
+<a href="https://prinha.tistory.com/entry/Spring-Boot-REST-API-%EC%84%A4%EA%B3%84-%EC%8B%9C-%EA%B3%A0%EB%A0%A4%ED%95%B4%EC%95%BC-%ED%95%A0-%EC%82%AC%ED%95%AD">SpringBoot Rest API 설계시 고려해야 할 사항</a>을 참고하여,</p>
+<ul>
+  <li>각 리소스별로 적절한 Request Method 사용하기</li>
+  <li><strong>적절한 HTTP Status Code 반환하기</strong></li>
+</ul>
+
+<p>를 적용해 갔다.</p>
+
+<p>기존 코드에서 <code class="language-plaintext highlighter-rouge">Request Method</code>, 무분별한 <code class="language-plaintext highlighter-rouge">PostMapping</code>을 용도에 맞게 <code class="language-plaintext highlighter-rouge">GetMapping</code>, <code class="language-plaintext highlighter-rouge">PathchMapping</code>, <code class="language-plaintext highlighter-rouge">PutMapping</code>, <code class="language-plaintext highlighter-rouge">DeleteMapping</code> 으로 수정을 했다. <br />
+그리고 이 글에서는 적절한 응답 데이터를 반환하기 위해 <code class="language-plaintext highlighter-rouge">Response</code> 구조를 설계해봤고 저절한 <code class="language-plaintext highlighter-rouge">HTTP Status Code</code>를 반환하고자 노력한 과정을 기술했다. 
+추가로 Request Method에 대한 자세한 내용은 기술하지 않았다.</p>
+
+<h3 id="목표">목표</h3>
+<ul>
+  <li>서버에서 응답 코드랑 코드랑 매칭되는 응답 메시지로 <code class="language-plaintext highlighter-rouge">HTTP reponse</code> 처리하기</li>
+</ul>
+
+<p><br /></p>
+
+<h3 id="목차">목차</h3>
+<h4 id="1-enum을-활용해서-custom-response-class-설계하기">1. Enum을 활용해서 Custom Response Class 설계하기</h4>
+<h4 id="2-커스텀-response-class-설계하기">2. 커스텀 Response Class 설계하기</h4>
+<h4 id="3-custom-response를-활용한-springboot-코드--vuejs-코드">3. Custom Response를 활용한 SpringBoot 코드 + vue.js 코드</h4>
+
+<p><br /></p>
+<blockquote> 1. Enum을 활용해서 Custom Response Class 설계하기 </blockquote>
+
+<p><a href="https://www.developer.com/design/how-to-use-enum-effectively-in-java/">참고 사이트 : how-to-use-enum-effectively-in-java</a></p>
+
+<p><img src="https://swimmingHwang.github.io/img/restapi.png" alt="REST%20API%2080750e10cc4a4e5aa9e4b18fad4068c8/Untitled.png" /></p>
+
+<p><img src="https://swimmingHwang.github.io/img/restapi1.png" alt="REST%20API%2080750e10cc4a4e5aa9e4b18fad4068c8/Untitled%201.png" /></p>
+
+<p>위의 있는 Response 데이터를 보다시피 코드(422)랑 <code class="language-plaintext highlighter-rouge">message</code>(Dupplicated send number …)를 개별적으로 입력했기에 <br />
+<strong>해당 코드와 메시지를 재사용시 오류를 범할 가능성이 높았다.</strong>    <br />
+그래서 자체적인 코드와 메시지를 엮어 사용하기 위해 <code class="language-plaintext highlighter-rouge">Enum</code>을 이용했다.</p>
+
+<ul>
+  <li>Enum을 활용한 코드 정의 클래스</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Getter</span>
+<span class="kd">public</span> <span class="kd">enum</span> <span class="nc">CommonResponseCode</span> <span class="kd">implements</span> <span class="nc">EnumMapper</span> <span class="o">{</span>
+    <span class="no">SUCCESS</span><span class="o">(</span><span class="mi">200</span><span class="o">,</span> <span class="s">"요청 처리에 성공했습니다."</span><span class="o">),</span>
+    <span class="no">INTERNAL_SERVER_ERROR</span><span class="o">(</span><span class="mi">500</span><span class="o">,</span> <span class="s">"서버 에러가 발생했습니다."</span><span class="o">),</span>
+    <span class="no">DUPLICATE_DATA</span><span class="o">(</span><span class="mi">401</span><span class="o">,</span> <span class="s">"중복 데이터가 존재합니다."</span><span class="o">);</span>
+
+    <span class="kt">int</span> <span class="n">code</span><span class="o">;</span>
+    <span class="nc">String</span> <span class="n">message</span><span class="o">;</span>
+
+    <span class="nc">CommonResponseCode</span><span class="o">(</span><span class="kt">int</span> <span class="n">code</span><span class="o">,</span> <span class="nc">String</span> <span class="n">message</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">this</span><span class="o">.</span><span class="na">code</span> <span class="o">=</span> <span class="n">code</span><span class="o">;</span>
+    <span class="k">this</span><span class="o">.</span><span class="na">message</span> <span class="o">=</span> <span class="n">message</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+<ul>
+  <li>EnumMapper</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">EnumMapper</span> <span class="o">{</span>
+    <span class="kt">int</span> <span class="nf">getCode</span><span class="o">();</span>
+    <span class="nc">String</span> <span class="nf">getMessage</span><span class="o">();</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p><br /></p>
+
+<blockquote> 2. 커스텀 Response Class 설계하기 </blockquote>
+
+<ul>
+  <li>변경 전 커스텀 <code class="language-plaintext highlighter-rouge">Response</code> Class</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">lombok.Builder</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">lombok.Getter</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">lombok.Setter</span><span class="o">;</span>
+
+<span class="nd">@Getter</span>
+<span class="nd">@Setter</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">CommonResponse</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="o">{</span>
+  <span class="kd">private</span> <span class="kt">int</span> <span class="n">code</span><span class="o">;</span>
+  <span class="kd">private</span> <span class="nc">String</span> <span class="n">message</span><span class="o">;</span>
+  <span class="kd">private</span> <span class="no">T</span> <span class="n">data</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>변경 후 커스텀 <code class="language-plaintext highlighter-rouge">Response</code> Class
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">status</code>는 <code class="language-plaintext highlighter-rouge">HttpStatus</code> 를 의미한다.</li>
+      <li><code class="language-plaintext highlighter-rouge">message</code>와 <code class="language-plaintext highlighter-rouge">responseCode</code>는 커스텀 코드와 메시지를 의미한다.</li>
+      <li><code class="language-plaintext highlighter-rouge">data</code>는 웹으로 응답할 데이터를 담는다.</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">lombok.Builder</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">lombok.Getter</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">lombok.Setter</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.http.HttpStatus</span><span class="o">;</span>
+
+<span class="nd">@Getter</span>
+<span class="nd">@Setter</span>
+<span class="nd">@Builder</span><span class="o">(</span><span class="n">builderMethodName</span> <span class="o">=</span> <span class="s">"commonResponseBuilder"</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">CommonResponse</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="o">{</span>
+
+  <span class="kd">private</span> <span class="nc">HttpStatus</span> <span class="n">status</span><span class="o">;</span>
+  <span class="kd">private</span> <span class="nc">String</span> <span class="n">message</span><span class="o">;</span>
+  <span class="kd">private</span> <span class="kt">int</span> <span class="n">responseCode</span><span class="o">;</span>
+  <span class="kd">private</span> <span class="no">T</span> <span class="n">data</span><span class="o">;</span>
+
+  <span class="c1">//빌더 사용시 status 필수값으로 사용하기 위해</span>
+  <span class="kd">public</span> <span class="kd">static</span> <span class="nc">CommonResponseBuilder</span><span class="o">&lt;</span><span class="nc">Object</span><span class="o">&gt;</span> <span class="nf">builder</span><span class="o">(</span><span class="nc">HttpStatus</span> <span class="n">status</span><span class="o">){</span> 
+    <span class="k">if</span><span class="o">(</span><span class="n">status</span> <span class="o">==</span> <span class="kc">null</span><span class="o">){</span>
+      <span class="k">throw</span> <span class="k">new</span> <span class="nf">IllegalArgumentException</span><span class="o">(</span><span class="s">"Common Response Builder must have 'status' parameter"</span><span class="o">);</span>
+    <span class="o">}</span>
+    <span class="k">return</span> <span class="nf">commonResponseBuilder</span><span class="o">().</span><span class="na">status</span><span class="o">(</span><span class="n">status</span><span class="o">);</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p><br /></p>
+
+<blockquote>3. Custom Response를 활용한 SpringBoot 코드 + vue.js 코드</blockquote>
+<ul>
+  <li>service 코드</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="o">(</span><span class="n">sendNumberList</span><span class="o">.</span><span class="na">stream</span><span class="o">().</span><span class="na">anyMatch</span><span class="o">(</span><span class="n">o</span> <span class="o">-&gt;</span> <span class="n">o</span><span class="o">.</span><span class="na">getSendNumber</span><span class="o">().</span><span class="na">equals</span><span class="o">(</span><span class="n">dto</span><span class="o">.</span><span class="na">getSendNumber</span><span class="o">()))){</span>
+  <span class="k">return</span> <span class="nc">CommonResponse</span><span class="o">.</span><span class="na">builder</span><span class="o">(</span><span class="nc">HttpStatus</span><span class="o">.</span><span class="na">UNPROCESSABLE_ENTITY</span><span class="o">)</span>
+      <span class="o">.</span><span class="na">message</span><span class="o">(</span><span class="nc">CommonResponseCode</span><span class="o">.</span><span class="na">DUPLICATE_DATA</span><span class="o">.</span><span class="na">getMessage</span><span class="o">())</span>
+      <span class="o">.</span><span class="na">responseCode</span><span class="o">(</span><span class="nc">CommonResponseCode</span><span class="o">.</span><span class="na">DUPLICATE_DATA</span><span class="o">.</span><span class="na">getCode</span><span class="o">())</span>
+      <span class="o">.</span><span class="na">data</span><span class="o">(</span><span class="n">dto</span><span class="o">.</span><span class="na">getSendNumber</span><span class="o">())</span>
+      <span class="o">.</span><span class="na">build</span><span class="o">();</span>
+<span class="o">}</span>
+</code></pre></div></div>
+<ul>
+  <li>controller 코드</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@PostMapping</span>
+<span class="nc">ResponseEntity</span><span class="o">&lt;?&gt;</span> <span class="n">create</span><span class="o">(</span><span class="nc">SendNumberDto</span> <span class="n">dto</span><span class="o">)</span> <span class="o">{</span>
+    <span class="nc">CommonResponse</span><span class="o">&lt;?&gt;</span> <span class="n">response</span> <span class="o">=</span> <span class="n">sendNumberService</span><span class="o">.</span><span class="na">registerSendNumberRequest</span><span class="o">(</span><span class="n">dto</span><span class="o">);</span>
+    <span class="k">return</span> <span class="k">new</span> <span class="nc">ResponseEntity</span><span class="o">&lt;&gt;(</span><span class="n">response</span><span class="o">,</span> <span class="n">response</span><span class="o">.</span><span class="na">getStatus</span><span class="o">());</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>프론트엔드 코드 (<code class="language-plaintext highlighter-rouge">vue.js</code>)</li>
+</ul>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="nx">save</span> <span class="p">()</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">isValid</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">$refs</span><span class="p">.</span><span class="nx">form</span><span class="p">.</span><span class="nx">validate</span><span class="p">()</span> <span class="c1">// validation check</span>
+  <span class="kd">let</span> <span class="nx">formData</span> <span class="o">=</span> <span class="nx">serialize</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">sendNumber</span><span class="p">)</span>
+
+  <span class="k">if</span><span class="p">(</span><span class="nx">isValid</span> <span class="o">&amp;&amp;</span> <span class="k">this</span><span class="p">.</span><span class="nx">sendNumber</span><span class="p">.</span><span class="nx">memberId</span><span class="p">){</span>
+    <span class="k">if</span><span class="p">(</span><span class="nx">confirm</span><span class="p">(</span><span class="dl">'</span><span class="s1">등록하시겠습니까?</span><span class="dl">'</span><span class="p">)){</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">$axios</span><span class="p">.</span><span class="nx">post</span><span class="p">(</span><span class="dl">'</span><span class="s1">/api/send-number</span><span class="dl">'</span><span class="p">,</span><span class="nx">formData</span> <span class="p">,</span> <span class="p">{</span>
+        <span class="na">headers</span><span class="p">:{</span>
+            <span class="dl">'</span><span class="s1">Authorization</span><span class="dl">'</span> <span class="p">:</span> <span class="s2">`Bearer </span><span class="p">${</span><span class="nx">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">localStorage</span><span class="p">.</span><span class="nx">getItem</span><span class="p">(</span><span class="dl">'</span><span class="s1">user</span><span class="dl">'</span><span class="p">)).</span><span class="nx">accessToken</span><span class="p">}</span><span class="s2">`</span><span class="p">,</span>
+            <span class="dl">'</span><span class="s1">Content-Type</span><span class="dl">'</span><span class="p">:</span> <span class="dl">"</span><span class="s2">multipart/form-data</span><span class="dl">"</span><span class="p">,</span>
+            <span class="na">contentType</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span> 
+            <span class="na">processData</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+          <span class="p">}</span>
+        <span class="p">})</span>
+      <span class="p">.</span><span class="nx">then</span><span class="p">((</span><span class="nx">response</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+          <span class="nx">alert</span><span class="p">(</span><span class="dl">"</span><span class="s2">발신번호 승인 요청 되었습니다.</span><span class="dl">"</span><span class="p">)</span>
+          <span class="k">this</span><span class="p">.</span><span class="nx">$router</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="dl">'</span><span class="s1">/send-number/manage</span><span class="dl">'</span><span class="p">)</span>
+      <span class="p">})</span>
+      <span class="p">.</span><span class="k">catch</span><span class="p">((</span><span class="nx">error</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+          <span class="nx">alert</span><span class="p">(</span><span class="nx">error</span><span class="p">.</span><span class="nx">response</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">message</span><span class="p">)</span> <span class="c1">//중복 데이터가 존재합니다.</span>
+          <span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="dl">"</span><span class="s2">failed save sendnumber</span><span class="dl">"</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span>
+      <span class="p">})</span>
+    <span class="p">}</span> 
+  <span class="p">}</span><span class="k">else</span><span class="p">{</span>
+    <span class="nx">alert</span><span class="p">(</span><span class="dl">"</span><span class="s2">필수값을 입력해 주세요</span><span class="dl">"</span><span class="p">)</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<blockquote>결과 script console로 찍어보기</blockquote>
+
+<h4 id="axios-응답-스키마">axios 응답 스키마</h4>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+  <span class="nl">data:</span> <span class="o">{},</span> <span class="c1">// `data`는 서버가 제공한 응답(데이터)입니다.   </span>
+  <span class="nl">status:</span> <span class="mi">200</span><span class="o">,</span> <span class="c1">// `status`는 서버 응답의 HTTP 상태 코드입니다.   </span>
+  <span class="nl">statusText:</span> <span class="err">'</span><span class="no">OK</span><span class="err">'</span><span class="o">,</span> <span class="c1">// `statusText`는 서버 응답으로 부터의 HTTP 상태 메시지입니다.   </span>
+  <span class="nl">headers:</span> <span class="o">{},</span><span class="c1">// `headers` 서버가 응답 한 헤더는 모든 헤더 이름이 소문자로 제공됩니다.   </span>
+  <span class="nl">config:</span> <span class="o">{},</span> <span class="c1">// `config`는 요청에 대해 `axios`에 설정된 구성(config)입니다.     </span>
+  <span class="nl">request:</span> <span class="o">{}</span> <span class="c1">//`request`는 응답을 생성한 요청입니다.     </span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>출처 : <a href="https://xn--xy1bk56a.run/axios/guide/response-schema.html">response-schema</a></p>
+
+<p><strong>결과가 잘 찍히는 것을 볼 수 있다. </strong></p>
+
+<ul>
+  <li>에러는 error.response안에 커스텀한 Reponse 데이터들이 들어가있다.</li>
+  <li>request error catch시 <code class="language-plaintext highlighter-rouge">error.reponse</code> 를 콘솔 로그에 찍은 결과
+  <img src="https://swimmingHwang.github.io/img/restapi2.png" alt="REST%20API%2080750e10cc4a4e5aa9e4b18fad4068c8/Untitled%202.png" /></li>
+  <li>error 만 찍으면
+  <img src="https://swimmingHwang.github.io/img/restapi3.png" alt="REST%20API%2080750e10cc4a4e5aa9e4b18fad4068c8/Untitled%203.png" /></li>
+</ul>
+
+<p><br /></p>
+<h3 id="참고-사이트">참고 사이트</h3>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">HttpRequest</code> <code class="language-plaintext highlighter-rouge">Response</code> 코드 <br />
+  <a href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/http/HttpStatus.html#UNPROCESSABLE_ENTITY">HttpStatus (Spring Framework 5.3.7 API)</a></li>
+  <li><a href="https://zorba91.tistory.com/298">빌더 필수값 설정</a></li>
+  <li><code class="language-plaintext highlighter-rouge">response</code>  구조 재설계 <br />
+  기존 : code 와 data 만 썼기에 내부적으로 에러 코드와 메시지를 전달할 수 없었음  <br />
+  <a href="https://stackoverflow.com/questions/26788608/design-pattern-to-model-request-and-response-objects-for-webservices">design-pattern-to-model-request-and-response-objects-for-webservices</a></li>
+</ul>
+:ET

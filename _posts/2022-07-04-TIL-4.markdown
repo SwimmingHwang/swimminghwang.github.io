@@ -1,0 +1,189 @@
+---
+layout:     post
+title:      Java Problem Solving - String (2)
+author:     Soo-young Hwang
+tags: 		JAVA
+subtitle:  	문자열 기초 문제를 풀면서 알게 된 함수나 개념
+category:   study
+published: true
+---
+
+# String
+
+- 문자열 기초 문제를 풀면서 알게 된 함수나 개념을 기술한다.
+
+## 07. 회문 문자열 (팰린드롬)
+
+> 팰린드롬(거꾸로 해도 같은 문자열) 인지 확인하기
+
+`String target = "abcdcba"`
+
+1) StringBuilder 클래스의 reverse 함수 사용하기
+
+```java
+  public String solution1(String str){
+    String answer = "NO";
+
+    String tmp = new StringBuilder(str).reverse().toString();
+    if(str.equalsIgnoreCase(tmp)) answer = "YES";
+    return answer;
+  }
+```
+
+2) 문자열 길이 / 2 만큼 직접 비교하기
+
+```java
+  public String solution2(String str) {
+    String answer = "YES";
+    str=str.toUpperCase();
+    int len = str.length();
+    for (int i = 0; i < len / 2; i++) {
+      if (str.charAt(i) != str.charAt(len - 1 - i)) {
+        answer = "NO";
+        break;
+      }
+    }
+    return answer;
+  }
+```
+
+- 대소문자 무시하면서 String 이 같은지 비교하는  함수 : `str.equalsIgnoreCase(anotherString)`
+
+
+
+## 08. replaceAll 정규식을 이용하여 특수문자 제거하기
+
+- 특수 문자 제거하기(하기 예시는 대소문자 제외한 문자 제거하기)
+
+```java
+String str = "sooYOUNG!@#$%%^bongsook";
+str = str.replaceAll("[^a-zA-Z]","");
+```
+
+- 참고 str.toUpperCase() : 이 함수는 특수문자가 섞여 있어도 적용이 가능하다.
+
+
+
+## 09. 숫자만 추출
+
+1) ascii number을 이용해 String에서 숫자만 추출하여 계산
+
+```java
+  public int solution1(String s) {
+    int answer = 0;
+    for (char x : s.toCharArray()) {
+      if (x >= '0' && x <= '9') answer = answer * 10 + (x - '0');
+    }
+    return answer;
+  }
+```
+
+2) 정규식으로 숫자만 골라내서 Integer.parseInt()
+
+```java
+  public int solution(String str) {
+    str = str.replaceAll("[^0-9]", "");
+    return Integer.parseInt(str);
+  }
+```
+
+3) `Character.isDigit(ch)` 함수 이용해 숫자인지 확인 Integer.parseInt()
+
+```java
+    String answer = "";
+    for (char x : s.toCharArray()) {
+      if(Character.isDigit(x)) answer += x;
+    }
+    return Integer.parseInt(answer);
+```
+
+
+
+## 10. 가장 짧은 문자 거리
+
+> teachermode e
+>
+> 를 입력받으면 문자에서 e와의 짧은 거리를 출력한다
+> 출력예시 :  1 0 1 2 1 0 1 2 2 1 0
+
+- p(e와의 거리를 저장)라는 정수를 이용해, 왼쪽에서 오른쪽으로 순회하며 값을 한 번 업데이트 후
+  오른쪽에서 왼쪽으로 순회하며 이미 있는 거리 값과 비교하며 한 번 더 업데이트 한다.
+
+- 초기의 p는 e와의 거리를 모르니 1000으로 초기화하고 시작
+
+- 왼쪽에서 오른쪽으로 업데이트 => 본인 위치에서 왼쪽에 등장한 e와의 거리로 업데이트
+
+    - 1000 0(e와 같아서 p가 0으로 업데이트) 1 2 3 0 1 2 3 4 0
+
+- 오른쪽에서 왼쪽으로 업데이트 (*단 비교해서 더 작은 경우 업데이트 한다)
+  => 본인의 위치에서 오른쪽에 등장한 e와의 거리로 업데이트
+
+    - 1 0 1 2 1 0 1 2 2 1 0
+
+
+
+## 11. 문자열 압축
+
+> 입력 예시 : KSTTTSEEKFKKKDJJGG
+> 출력 예시 : KST3SE2KFK3DJ2G2
+
+```java
+  public String solution(String s) {
+    String answer = "";
+    s = s + " "; // 마지막 i 와 i+1 비교 시 에러나서 빈문자 넣어주기
+    int cnt = 1;
+    for(int i=0;i<s.length()-1;i++){
+      if(s.charAt(i) == s.charAt(i+1)) cnt++;
+      else{
+        answer += s.charAt(i);
+        if(cnt>1) answer += cnt;
+        cnt = 1;
+      }
+    }
+    return answer;
+  }
+
+```
+
+- cnt 변수를 이용해 앞에서 부터 같으면 카운트 ++ 을 해 주고.
+  다르면 그 다른 문자열 부터 다시 카운트를 한다 는 단순한 개념을 구현한다.
+
+1. cnt 를 1로 초기화 한다
+2. 왼쪽부터 순회한다
+3. 본인의 위치 문자와 다음 오게되는 문자가 같으면 ++
+4. **다르면 return 값에 본인의 문자와 카운트 값을 append 하고 카운트도 1로 초기화**
+5. 반복
+
+- 주의할 점은 마지막 인덱스에서 그 다음과 비교하려면 에러가 나지만, return 값에 추가가 되게 하기 위한 단순한 방법으로  공백 추가로 처리한다
+
+
+
+## 12 암호
+
+> #과 * 로 주어진 문자열을 이진수로 바꾸고, 십진수로 바꿔 ascii 숫자를 활용해 문자로 변환
+
+- if문을 사용했었는데 아래처럼 replace 함수를 쓰면 쉽다
+
+```java
+String tmp = s.substring(0, 7)
+  .replace('#','1')
+  .replace('*','0');
+```
+
+- 이진수를 십진수로 바꾸는 함수를 작성했었는데, Integer 클래스에 parseInt 함수의 두번째 인자는 radix(기수) 를 입력받는다.
+    - `int num = Integer.parseInt(String: temp, int radix: radix)`;
+
+- 얼떨결에 알게 된 이진수를 십진수로 바꾸는 로직 (*기억해 두면 좋을 듯)
+
+```java
+    private int binaryToDecimal(int binary) {
+      int decimalNumber = 0, i = 0;
+  
+      while (binary > 0) {
+        decimalNumber += Math.pow(2, i++) * (binary % 10);
+        binary /= 10;
+      }
+      return decimalNumber;
+    }
+```
+

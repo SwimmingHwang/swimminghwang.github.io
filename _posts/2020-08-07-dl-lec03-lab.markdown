@@ -1,0 +1,37 @@
+---
+layout:     notebook
+title:      모두의 딥러닝 - Lecture 03 Lab 정리
+author:     Soo-young Hwang
+tags: 		Deep-Learning
+subtitle:  	Lec03 lab -  실습
+category:  study
+
+notebookfilename: dl-lec03-lab     
+visualworkflow: true
+
+---
+
+
+### 서론
+이번 포스트는 [지난 포스트](https://swimminghwang.github.io/study/2020/05/22/dl-lec03/)에 이어 tensorflow version 2.1.0 바탕으로 실습을 했습니다.    
+코드는 [링크](https://github.com/hunkim/DeepLearningZeroToAll/blob/master/tf2/tf2-03-1-minimizing_cost_show_graph.py)를 참고했습니다.   
+
+- 참고) 본론 내용은 `jupyter notebook` 파일로 기술했습니다.   
+
+
+### 본론
+
+#### 목차
+
+
+1. Sequential 모델(graph) 생성
+2. Train 준비
+3. Train
+4. Predict 예측
+
+
+
+
+
+
+
