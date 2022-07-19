@@ -1,9 +1,8 @@
 ---
 layout:     post
 title:      Github blog와 Google Analytics 연동하기
-author:     Soo-young Hwang
-tags: 		Github-pages
-category:  blog
+category:   Github blog
+tags: 		  Github-pages
 ---
 
 ### 서론
@@ -35,5 +34,5 @@ g-analytics: 추적 ID
 ### 결론
 ![Description](http://swimminghwang.github.io/assets/images/githubpages-ga1.png)
 
-### references
+### References
 [inasie.github.io](https://inasie.github.io/it%EC%9D%BC%EB%B0%98/1/)
