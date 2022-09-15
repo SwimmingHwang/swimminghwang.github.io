@@ -1,17 +1,17 @@
 ---
 layout:     post
-title:      javascript 에서 zip  → spring boot multipart file unzip 
+title:      클라이언트에서 파일 압축 후  multipart file 형식으로 서버로 요청 후 파일 압축 풀기
 author:     Soo-young Hwang
-tags: 		JSZip 
-subtitle:  	
-category:   study
+tags: 		javascript, multipart
+category: Spring Boot
+subtitle:
 ---
 
 #### 라이브러리 github
 [https://github.com/Stuk/jszip/tree/master/dist](https://github.com/Stuk/jszip/tree/master/dist)
 
 
-#### 웹단 코드 
+#### 웹단 코드
 ```jsx
 $.getScript("/js/vendor/jszip.js")
 $.getScript("/js/vendor/jszip.min.js")
@@ -75,12 +75,12 @@ publicList<String> saveFile(MultipartFile[]targetFileList)
 }
 ```
 
-웹에서 json 파일을 txt 파일로 저장해서 서버로 저장하는 과정에서 ㅅ엑셀파일보다 텍스트 파일의 용량이 너무 컸다.  이문제를 해결하려고 압축해서 전송하고 unzip하려했는데, 
+웹에서 json 파일을 txt 파일로 저장해서 서버로 저장하는 과정에서 ㅅ엑셀파일보다 텍스트 파일의 용량이 너무 컸다.  이문제를 해결하려고 압축해서 전송하고 unzip하려했는데,
 
-생각보다 zip하는데 성능이 안 좋았다. 
+생각보다 zip하는데 성능이 안 좋았다.
 
 java에서 unzip의 성능은 괜찮았는데 자바스크립트 단에서 속도가 너무 안 났다. (29MB 를 zip 하는데 5초 이상 걸렸다)
 
-JSzip  라이브러리에 성능 문제가 존재 했다. 라이브러리를 이용해 구현할 때 라이브러리의 성능 또한 고려해야 함을 배웠다. 
+JSzip  라이브러리에 성능 문제가 존재 했다. 라이브러리를 이용해 구현할 때 라이브러리의 성능 또한 고려해야 함을 배웠다.
 
 [https://stuk.github.io/jszip/documentation/limitations.html](https://stuk.github.io/jszip/documentation/limitations.html)

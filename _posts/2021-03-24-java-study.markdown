@@ -1,17 +1,17 @@
 ---
 layout:     post
-title:      Effective Java 3/E 9장. 일반적인 프로그래밍 원칙 
+title:      Effective Java 3/E 9장. 일반적인 프로그래밍 원칙
 author:     Soo-young Hwang
 tags: 		JAVA
 subtitle:  	아이템57. 지역변수의 범위를 최소화하라
-category:   study
+category:   Java
 ---
 
 
-### 서론   
-<!-- 회사에서 동기들이랑 자바 스터디를 만들었다.   
+### 서론
+<!-- 회사에서 동기들이랑 자바 스터디를 만들었다.
 나는 9장. 일반적인 프로그래밍 원칙을 맡았고 노션에 정리한 내용을 여기로 옮겼다.   -->
-첫번째 아이템은 <strong>아이템57. 지역변수의 범위를 최소화하라</strong> 
+첫번째 아이템은 <strong>아이템57. 지역변수의 범위를 최소화하라</strong>
 
 ### 아이템57. 지역변수의 범위를 최소화하라
 <blockquote>용어 체크</blockquote>
@@ -23,12 +23,12 @@ class Ex_variables{
 		// 전역변수(객체변수) : 같은클래스에서 호출이 가능
 		int global_int; //private이라고하지만
 		// 전역변수(클래스변수) : 다른 클래스에서도 호출이 가능
-		static int global_statuc_int; 
+		static int global_statuc_int;
 		//Q. public or not은 설정..
 		void method()
 		{
 			//지역변수 { }안에 생성되며 { }를 벗어나면
-			int local_int = 0;  
+			int local_int = 0;
 		}//method() 라는 메소드가 끝나는 시점에 바로 삭제
 }
 ```
@@ -44,51 +44,51 @@ class Ex_variables{
     ```java
     class Card {
 
-    String kind;           
+    String kind;
 
     int number;
 
-    static int width = 200;  
+    static int width = 200;
 
-    static int height = 300;    
+    static int height = 300;
 
     }
     ```
 
     ```java
 
-    public class Ex_variables3 { 
+    public class Ex_variables3 {
 
-    public static void main(String[] args){ 
+    public static void main(String[] args){
 
-    System.out.println("Card의 너비는 :"+ Card.width); 
-    System.out.println("Card의 높이는 :"+ Card.height); 
+    System.out.println("Card의 너비는 :"+ Card.width);
+    System.out.println("Card의 높이는 :"+ Card.height);
 
-    Card c1 = new Card(); 
-    c1.kind = "Heart"; 
-    c1.number = 7; 
+    Card c1 = new Card();
+    c1.kind = "Heart";
+    c1.number = 7;
 
-    Card c2 = new Card(); 
-    c2.kind = "Spade"; 
-    c2.number = 4; 
+    Card c2 = new Card();
+    c2.kind = "Spade";
+    c2.number = 4;
 
-    c1.width = 250; 
-    c1.height = 350; 
+    c1.width = 250;
+    c1.height = 350;
 
-    } 
+    }
     }
     ```
 
 - 추가) 클래스
     - 클래스의 요소 : 필드와 메소드 (전에 설명함)
 
-    인스턴스(instance)멤버란 객체(instance)를 생성한 후 사용할 수 있는 `filed`와 `method` 를 말하는데, 이들을 각각 `instance filed` , `instance method` 인스턴스 필드, 인스턴스 메소드라고 부른다. 
+    인스턴스(instance)멤버란 객체(instance)를 생성한 후 사용할 수 있는 `filed`와 `method` 를 말하는데, 이들을 각각 `instance filed` , `instance method` 인스턴스 필드, 인스턴스 메소드라고 부른다.
 
-    즉, 아래의 예시는 인스턴스 멤버들이다. 인스턴스 필드와 인스턴스 메소드는 객체에 소속되어있는 멤버이기 때문에 **객체 없이는 사용할 수 없다.** 
+    즉, 아래의 예시는 인스턴스 멤버들이다. 인스턴스 필드와 인스턴스 메소드는 객체에 소속되어있는 멤버이기 때문에 **객체 없이는 사용할 수 없다.**
 
     ```java
     public class Car{
-    	// field 
+    	// field
     	int gas;
 
     	// method
@@ -96,9 +96,9 @@ class Ex_variables{
     }
     ```
 
-    위의 예시에서 `gas` 필드와 `setSpeed()` 메소드는 인스턴스 멤버이기 때문에 외부 클래스에서 사용하기 위해서는 car객체(instance)를 생성하고 참조 변수에서 접근해야 한다. 
+    위의 예시에서 `gas` 필드와 `setSpeed()` 메소드는 인스턴스 멤버이기 때문에 외부 클래스에서 사용하기 위해서는 car객체(instance)를 생성하고 참조 변수에서 접근해야 한다.
 
-    *참고로 인스턴스 필드 gas는 객체마다 따로 존재하고 인스턴스 메소드는 객체마다 존재하지 않고 메소드 영역에 저장되고 공유됨. 
+    *참고로 인스턴스 필드 gas는 객체마다 따로 존재하고 인스턴스 메소드는 객체마다 존재하지 않고 메소드 영역에 저장되고 공유됨.
 
     - `static`
         - Instance에 소속된 멤버가 아니라 클래스에 소속된 멤버이기 때문에 클래스 멤버라고도 부르는 것.
@@ -139,7 +139,7 @@ class Ex_variables{
                 ```
 
     - 클래스의 접근 제한
-        - Class 선언시 public을 생략했으면 클래스는 default 접근 제한을 가진다. Default 접근 제한을 가지면 
+        - Class 선언시 public을 생략했으면 클래스는 default 접근 제한을 가진다. Default 접근 제한을 가지면
         **같은 패키지에서 아무런 제한 없이 사용할 수 있지만 다른 패키지에서는 사용할 수 없도록 제한된다.**
 
             참고* 생성자를 선언하지 않으면 컴파일러에 의해 자동으로 기본 생성자가 추가되며, 기본 생성자의 접근 제한은 클래스의 접근 제한과 동일
@@ -155,7 +155,7 @@ class Ex_variables{
         public class A{
         	// field
         	public int filed1; // public 접근 제한
-        	int filed2; // protected 접근 제한 
+        	int filed2; // protected 접근 제한
         	private int filed3; // private 접근 제한
 
         	// 생성자
@@ -163,7 +163,7 @@ class Ex_variables{
         		filed1 = 1; // ㅇ
         		filed2 = 1; // ㅇ
         		filed3 = 1; // ㅇ
-        	
+
         		method1(); // ㅇ
         		method2(); // ㅇ
         		method3(); // ㅇ
@@ -183,7 +183,7 @@ class Ex_variables{
         		filed1 = 1; // ㅇ
         		filed2 = 1; // ㅇ
         		filed3 = 1; // x.  -> private field 접근 불가(컴파일 에러)
-        	
+
         		method1(); // ㅇ
         		method2(); // ㅇ
         		method3(); // x -> private 메소드 접근 불가 (컴파일 에러)
@@ -199,7 +199,7 @@ class Ex_variables{
         		filed1 = 1; // ㅇ
         		filed2 = 1; // x -> default field 접근 불가(컴파일 에러)
         		filed3 = 1; // x -> private field 접근 불가(컴파일 에러)
-        	
+
         		method1(); // ㅇ
         		method2(); // x -> default field 접근 불가(컴파일 에러)
         		method3(); // x -> private 메소드 접근 불가 (컴파일 에러)
@@ -212,14 +212,14 @@ class Ex_variables{
 
 ### 1. 가장 처음 쓰일 때 선언하기 (= 사용할 때 선언하기)
 
-미리 선언하면? 
+미리 선언하면?
 
 - 코드가 어수선해지며 가독성이 떨어짐
 - 변수를 실제로 사용하는 시점에 타입과 초깃값이 기억나지 않을 수 있음.
 - 지역변수의 범위 자체가 선언된 지점부터 해당 블록({}를 의미함)이 끝날 때 까지 임.
 혹시나 블록 밖에 변수를 선언하면 그 블록이 끝나도 변수는 살아있고 의도하지 않은 범위에서 사용하면 큰일남. → 즉, 사용할 때 선언하지 않으면 원하지 않는 위치에서 해당 변수를 사용하게 될 수도 있고 실수를 범할 수 있음.
 
-**→ 미리 선언하면 여러 실수를 범할 수 있으니 가장 처음 쓰일 때 선언하자.**  
+**→ 미리 선언하면 여러 실수를 범할 수 있으니 가장 처음 쓰일 때 선언하자.**
 
 ### 2. 선언과 동시에 초기화하기
 
@@ -227,7 +227,7 @@ class Ex_variables{
 
 - `try-catch`에서는 예외
 
-    변수를 초기화하는 표현식에서 검사 예외를 던질 가능성이 있다면 
+    변수를 초기화하는 표현식에서 검사 예외를 던질 가능성이 있다면
     try 블록 안에서 초기화 할 것 (예외가 블록을 넘어 메서드에 전파되어서)
 
     하지만, 블록 바깥에서도 사용해야하면(초기화 못해도) try 블록 바로 앞에서 선언하기
@@ -264,11 +264,11 @@ class Ex_variables{
     ...
     ```
 
-    이는 컴파일도 잘 되고 예외도 던지지 않음. 
-    하지만, 두번째 `while` 문은 c2를 순회하지 않고 곧장 끝남. 
-    → c2 가 비어있다고 착각할 수 있음! 
+    이는 컴파일도 잘 되고 예외도 던지지 않음.
+    하지만, 두번째 `while` 문은 c2를 순회하지 않고 곧장 끝남.
+    → c2 가 비어있다고 착각할 수 있음!
 
-    `for` 문을 사용하면 이런 오류를 컴파일타임에 잡아줄 수 있다. 
+    `for` 문을 사용하면 이런 오류를 컴파일타임에 잡아줄 수 있다.
     ( i를 찾을 수 없다 는 컴파일 오류를 냄)
 
     ```java
@@ -277,7 +277,7 @@ class Ex_variables{
     	...
     }
 
-    // 컴파일 오류 
+    // 컴파일 오류
     for(Iterator<Element i2 = c2.iterator(); i.hasNext();){
     	Element e2 = i2.next();
     	...
@@ -285,8 +285,8 @@ class Ex_variables{
     ```
 
 2. 변수 유효 범위가 `for` 문 범위와 일치하여 똑같은 이름의 변수를 여러 반복문에서도 써도 아무런 영향을 주지 않음(세련됨)
-3. `for` 문은 `while` 보다 짧아서 가독성이 좋다. 
-4. `for`, `for-each` 등 반복 변수( ex : i)의 범위가 반복문의 몸체, 그리고 for 키워드와 몸체 사이의 괄호 안으로 제한된다. 
+3. `for` 문은 `while` 보다 짧아서 가독성이 좋다.
+4. `for`, `for-each` 등 반복 변수( ex : i)의 범위가 반복문의 몸체, 그리고 for 키워드와 몸체 사이의 괄호 안으로 제한된다.
 5. 그 외 지역변수 범위를 최소화하는 반복문 예시
 
     범위가 일치하는 두 반복 변수 `i` and `n` 를 쓸때 아래처럼 하기.
@@ -308,7 +308,7 @@ class Ex_variables{
         ```
 
         반복자(iterator)를 사용해야하는 상황아니면
-        ( `for-each` , `iterator` 의 `remove` 메서드를 써야하면 )전통 for문 쓰기 
+        ( `for-each` , `iterator` 의 `remove` 메서드를 써야하면 )전통 for문 쓰기
 
         ```java
         for(Iterator<Element> i = c.iterator(); i.hasNext();){

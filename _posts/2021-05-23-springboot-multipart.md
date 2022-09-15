@@ -2,9 +2,9 @@
 layout:     post
 title:      Vue.js의 axios를 이용한 SpringBoot로 이미지 파일 업로드하는 법
 author:     Soo-young Hwang
+category: Spring Boot
 tags: 		Spring-Boot Vue.js 
 subtitle:  	
-category:   study
 ---
 
 
