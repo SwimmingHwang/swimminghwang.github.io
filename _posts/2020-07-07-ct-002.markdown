@@ -2,7 +2,7 @@
 layout:     post
 title:      프로그래머스) 위장 - 해시
 category:  Coding test
-tags: 		programmers, python
+tags: 		programmers python
 subtitle:   Hash Table
 ---
 

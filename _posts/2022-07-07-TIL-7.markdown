@@ -1,10 +1,10 @@
 ---
 layout:     post
-title:      Java Problem Solving - Two pointer 
+title:      Java Problem Solving - Two pointer
 author:     Soo-young Hwang
 tags: 		JAVA
 subtitle:  	Two pointer 활용 문제 해결을 위한 알고리즘 기초
-category:   study
+category:   Coding test
 published: true
 ---
 
@@ -134,7 +134,7 @@ public class 연속부분수열 {
 - 처리할 원소가 없을 때 까지 반복
 
 
-**이 알고리즘의 시간 복잡도는 O(N+M)**        
+**이 알고리즘의 시간 복잡도는 O(N+M)**
 => 단순히 각 리스트의 모든 원소를 한 번씩만 순회하면 되기 때문에
 
 이 알고리즘의 경우 병합 정렬과 같은 일부 알고리즘에서 사용되고 있다.
@@ -228,7 +228,7 @@ public class 두배열합치기 {
 
 
 이러한 문제는 코딩 인터뷰에서 손코딩 문제로 출제될 수 있으니 잘 기억하고 있자.
-  
+
 
 
 

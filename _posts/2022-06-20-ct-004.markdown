@@ -4,13 +4,13 @@ title:      백준 16916 부분문자열
 author:     Soo-young Hwang
 tags: 		Coding-test
 subtitle:   KMP 알고리즘
-category:   study
+category:   Coding test
 ---
 
 <blockquote>문제</blockquote>
-[부분 문자열](https://www.acmicpc.net/problem/16916)   
+[부분 문자열](https://www.acmicpc.net/problem/16916)
 
-사용 언어 : `java8`      
+사용 언어 : `java8`
 개념 : KMP 알고리즘
 
 
@@ -94,16 +94,16 @@ public class B16916 {
     System.out.print(KMP(br.readLine(), br.readLine()));
   }
 
-  // O(m)의 시간 복잡도 
+  // O(m)의 시간 복잡도
   public static int[] getPi(String s1) {
     int[] pi = new int[s1.length()];
     int j = 0;
     for(int i = 1; i < s1.length(); i++) {
       while(j > 0 && s1.charAt(i) != s1.charAt(j)) { // 중간 단계 뛰어 넘는 부분
-        j = pi[j - 1]; // 다르면 j인덱스를 앞으로 당김 
+        j = pi[j - 1]; // 다르면 j인덱스를 앞으로 당김
       }
       if(s1.charAt(i) == s1.charAt(j)) {
-        pi[i] = j += 1; // 같으면 
+        pi[i] = j += 1; // 같으면
       }
     }
     return pi;
@@ -131,7 +131,7 @@ public class B16916 {
 
 ```
 
-### 예제 설명 
+### 예제 설명
 - A B A 'B' A B A C
 - A B A 'C'
 - i=3, j=3 일 때  s1에서 0~2(j-1)까지는 일치했던 사실을 알 고 있다.
@@ -139,4 +139,4 @@ public class B16916 {
   - *어차피 불일치할 B부터 다시 비교하는 것이 아닌 다시 A로 시작 하는 지점 으로 위치하고 틀렸던 s의 i=3과 당겨진 s1 의 j와 비교한다
 - A B A 'B' A B A C
 -     A 'B' A C
-- 이게 가능한 이유는, A B A 의 pi 배열을 구해놨는데, 이 pi 배열의 의미가 미리 전처리 해두고 중간의 많은 시도를 건너 뛰게 해 주기 때문이다. 
+- 이게 가능한 이유는, A B A 의 pi 배열을 구해놨는데, 이 pi 배열의 의미가 미리 전처리 해두고 중간의 많은 시도를 건너 뛰게 해 주기 때문이다.

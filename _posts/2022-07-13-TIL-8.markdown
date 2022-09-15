@@ -3,7 +3,7 @@ layout:     post
 title:      Comparable과 Comparator 알아보기
 author:     Soo-young Hwang
 tags: 		JAVA
-category:
+category:  Java
 published: true
 ---
 ### Comparable과 Comparator 알아보기

@@ -2,7 +2,7 @@
 layout:     post
 title:      클라이언트에서 파일 압축 후  multipart file 형식으로 서버로 요청 후 파일 압축 풀기
 author:     Soo-young Hwang
-tags: 		javascript, multipart
+tags: 		javascript multipart
 category: Spring Boot
 subtitle:
 ---

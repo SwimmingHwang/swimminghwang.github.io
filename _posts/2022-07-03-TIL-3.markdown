@@ -4,7 +4,7 @@ title:      Java Problem Solving - String (1)
 author:     Soo-young Hwang
 tags: 		JAVA
 subtitle:  	문자열 기초 문제를 풀면서 알게 된 함수나 개념
-category:   study
+category:   Coding test
 published: true
 ---
 
@@ -86,16 +86,16 @@ String 에 += char 연산이 가능하지만, String 은 immutable(불변) 객�
 
 - `Collections.reverse()`
     - Collectons 클래스 함수
- 
+
 ```java
- ArrayList<String> list = new ArrayList<>(Arrays.asList("H", "e", "l", "l", "o"));       
- System.out.println(list);  // [H, e, l, l, o]      
-  
+ ArrayList<String> list = new ArrayList<>(Arrays.asList("H", "e", "l", "l", "o"));
+ System.out.println(list);  // [H, e, l, l, o]
+
  Collections.reverse(list);
  System.out.println(list);  // [o, l, l, e, H]
 ```
 
-    
+
 
 - **뒤집는 함수 직접 만드는 법**
 

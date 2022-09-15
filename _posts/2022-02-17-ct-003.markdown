@@ -4,15 +4,15 @@ title:      BOJ) 숨바꼭질
 author:     Soo-young Hwang
 tags: 		Coding-test
 subtitle:   최단경로
-category:  study
+category:  Coding test
 ---
 
 <blockquote>문제</blockquote>
-[숨바꼭질](https://www.acmicpc.net/problem/6118)   
+[숨바꼭질](https://www.acmicpc.net/problem/6118)
 
 ![image-20220217004206535](/Users/sooyoung/SwimmingHwang.github.io/img/image-20220217004206535.png)
 
-사용 언어 : `python3`      
+사용 언어 : `python3`
 개념 : 최단경로, 다익스트라 알고리즘
 
 <blockquote>최단경로</blockquote>
@@ -20,9 +20,9 @@ category:  study
 
 #### > 내 풀이
 
-**핵심**   
+**핵심**
 1) 최단 경로 알고리즘 - 다익스트라
-	- 1에서 출발하여 경로가 제일 긴 정점 구하기, 긴 정점까지의 거리 구하기, 그 거리와 같은 정점들 구하기 -> distance array 꼭 필요   
+	- 1에서 출발하여 경로가 제일 긴 정점 구하기, 긴 정점까지의 거리 구하기, 그 거리와 같은 정점들 구하기 -> distance array 꼭 필요
 2) 인접리스트로 구현
 
 
@@ -41,7 +41,7 @@ graph = [[] for _ in range(n + 1)]
 distance = [INF] * (n + 1)
 
 
-for _ in range(m): # 인접행렬 방식   
+for _ in range(m): # 인접행렬 방식
 
     a_i, b_i = map(int, input().split())
     graph[a_i].append((b_i, 1))
@@ -50,9 +50,9 @@ for _ in range(m): # 인접행렬 방식
 def dijkstra(start):
     q = []
     heapq.heappush(q, (0, start))  # cost, vertex
-    
+
     distance[start] = 0
-    
+
     while q:
         dist, now = heapq.heappop(q)
         if distance[now] < dist:
@@ -83,7 +83,7 @@ print(distance.index(maxDistance)+1, maxDistance, distance.count(maxDistance))
 {% endhighlight %}
 
 
-#### > 배운 점 
+#### > 배운 점
 1. 리스트에서 최대값의 index를 구하려면
 - list.index(max_val)
 2. 리스트에서 원소의 갯수 구하려면

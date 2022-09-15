@@ -3,7 +3,7 @@ layout:     post
 title:      Spring REST Docs를 이용한 API 문서 자동화하기
 author:     Soo-young Hwang
 category: Spring Boot
-tags:     API-documentation, Spring-Boot 
+tags:     API-documentation Spring-Boot 
 ---
 
 ## 서론

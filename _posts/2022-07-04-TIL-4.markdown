@@ -4,7 +4,7 @@ title:      Java Problem Solving - String (2)
 author:     Soo-young Hwang
 tags: 		JAVA
 subtitle:  	문자열 기초 문제를 풀면서 알게 된 함수나 개념
-category:   study
+category:   Coding test
 published: true
 ---
 
@@ -178,7 +178,7 @@ String tmp = s.substring(0, 7)
 ```java
     private int binaryToDecimal(int binary) {
       int decimalNumber = 0, i = 0;
-  
+
       while (binary > 0) {
         decimalNumber += Math.pow(2, i++) * (binary % 10);
         binary /= 10;
