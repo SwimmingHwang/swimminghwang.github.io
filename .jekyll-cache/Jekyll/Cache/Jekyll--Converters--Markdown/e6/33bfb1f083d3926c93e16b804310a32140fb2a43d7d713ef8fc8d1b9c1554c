@@ -1,6 +1,0 @@
-I"c<h3 id="vuejs-axios를-이용한-springboot로-이미지-파일-업로드하는-법"><code class="language-plaintext highlighter-rouge">Vue.js</code> <code class="language-plaintext highlighter-rouge">axios</code>를 이용한 <code class="language-plaintext highlighter-rouge">SpringBoot</code>로 이미지 파일 업로드하는 법</h3>
-<ul>
-  <li>코드만 기록했고 코드에 대한 간략한 설명만 기술함.</li>
-  <li>버전 : <code class="language-plaintext highlighter-rouge">vue.js</code> 2버전, <code class="language-plaintext highlighter-rouge">Spring boot</code> 2.3.4 버전</li>
-</ul>
-:ET

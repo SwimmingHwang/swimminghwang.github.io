@@ -110,7 +110,6 @@ Spring REST docs 적용을 중점으로 작성했다. ~~테스트 코드는 사�
 
 test 패키지 구조는 다음과 같다
 
-![image-20220423180745372](https://swimmingHwang.github.io/img/Gruntfile.png)
 
 
 #### **1. Customizing requests and responses**
