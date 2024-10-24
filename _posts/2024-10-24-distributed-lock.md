@@ -89,7 +89,7 @@ class RedisLockAspect(
     - **락이 없는 경우**: `joinPoint.proceed()`를 호출해 메서드를 실행하고, 이후 `deleteLock()`을 통해 락을 해제합니다.
     - **락이 있는 경우**: 중복 요청을 방지하기 위해 `FailException`을 던져 **요청을 차단**합니다.
 
-### 3.  컨트롤러 
+### 3.  컨트롤러 (redislock 어노테이션 적용한 부분)
 ```kotlin
 @RedisLock(expiration = 15)  
 @PostMapping(Routes.API_PRICE_TEMPLATE_SYNC_GOOGLE_SHEET)  
@@ -100,11 +100,7 @@ fun syncBetweenGoogleSheetAndDb(
         data = priceTemplateService.syncGoogleSheetAndDb(PriceTemplateType.ofCode(type))  
     )}
 ```
-- **`@RedisLock(expiration = 15)`**: 이 함수는 **15초 동안 락이 걸린 상태**에서 실행됩니다. 락이 걸린 동안 동일한 요청이 들어오면 **중복 처리가 차단**됩니다.
-- **`@PostMapping`**: 이 함수는 **HTTP POST 요청**을 처리하는 **API 엔드포인트**로 사용됩니다.
-- **`syncBetweenGoogleSheetAndDb`**: 이 함수는 구글 시트와 데이터베이스 간의 데이터를 동기화하는 로직을 처리합니다. 요청 시 **type** 값을 받아, 해당 값에 맞는 데이터 동기화를 수행합니다.
-- **`spacePlanTemplateService.syncGoogleSheetAndDb()`**: 구체적인 동기화 작업을 수행하는 서비스 로직을 호출하며, 반환값은 동기화된 데이터 목록입니다.
-- **`BaseResponse`**: 응답 객체로, 성공적으로 동기화된 데이터 목록을 클라이언트에게 반환합니다.
+- **`@RedisLock(expiration = 15)`**: 이 **어노테이션**을 락 하고자 하는 함수에 적용하고, 적용된 **함수가 실행되는 동안** 동일한 **HTTP 요청**이 중복으로 들어올 경우 해당 요청을 **차단**하고 **중복 처리를 방지**합니다.
 
 ## **결과**
 
