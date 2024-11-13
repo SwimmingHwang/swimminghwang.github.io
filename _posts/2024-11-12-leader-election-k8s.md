@@ -82,7 +82,7 @@ Spring Cloud Kubernetes 리더 선거 메커니즘은 Kubernetes `ConfigMap`을 
 ### 1. Pod 1 리더로 선출
 
 
-![https://swimminghwang.github.io/assets/Pastedimage20241113070616.png](https://swimminghwang.github.io/assets/Pastedimage20241113070616.png)
+![https://swimminghwang.github.io/assets/images/Pastedimage20241113070616.png](https://swimminghwang.github.io/assets/images/Pastedimage20241113070616.png)
 
 
 - **EKS Cluster**에 여러 Pod가 존재하며, 각 Pod는 리더 선출을 위해 `ConfigMap`을 감시합니다.
@@ -94,7 +94,7 @@ Spring Cloud Kubernetes 리더 선거 메커니즘은 Kubernetes `ConfigMap`을 
 
 ### 2. Pod 2가 이벤트를 받아 리더가 되는 경우 
 
-![https://swimminghwang.github.io/assets/Pastedimage20241113070933.png](https://swimminghwang.github.io/assets/Pastedimage20241113070933.png)
+![https://swimminghwang.github.io/assets/images/Pastedimage20241113070933.png](https://swimminghwang.github.io/assets/images/Pastedimage20241113070933.png)
 
 
 - **Pod 2**가 EKS 클러스터 내에서 `ConfigMap`의 변경을 감시하고, 리더 선출 이벤트를 수신하여 리더십 상태를 갱신합니다.
@@ -228,7 +228,7 @@ subjects:
 
 configmap 데이터에서 확인할 수 있습니다. 
 
-![https://swimminghwang.github.io/assets/Pastedimage20241113221303.png](https://swimminghwang.github.io/assets/Pastedimage20241113221303.png)
+![https://swimminghwang.github.io/assets/images/Pastedimage20241113221303.png](https://swimminghwang.github.io/assets/images/Pastedimage20241113221303.png)
 
 
 ## 결론
