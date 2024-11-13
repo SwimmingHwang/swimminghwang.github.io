@@ -17,12 +17,12 @@ subtitle:
 
 그래서 이번 포스트에서는 Spring Cloud Kubernetes와 Spring Scheduler를 사용하여 리더 선출 기능을 구현하는 방법을 살펴보겠습니다.
 
-### 리더 선출의 필요성
+## 리더 선출의 필요성
 
 여러 인스턴스가 동시에 주기적인 작업을 실행하면 불필요한 중복 작업이 발생할 수 있습니다. 리더 선출은 이 문제를 해결하여 클러스터 내 하나의 인스턴스에서만 특정 작업이 실행되도록 보장합니다. Kubernetes는 이러한 리더 선출 메커니즘을 지원하며, Spring Cloud Kubernetes는 이를 쉽게 애플리케이션에 통합할 수 있도록 돕
 습니다.
 
-### 동작 방식
+## 동작 방식
 
 
 Spring Cloud Kubernetes 리더 선거 메커니즘은 Kubernetes `ConfigMap`을 사용하여 Spring Integration의 리더 선출 API를 구현합니다.
@@ -111,7 +111,7 @@ recordwatcher 가 configmap watch 하고 있고 변경 이벤트를 감지 (even
 경우3) **다른 파드가 리더면** acquire 호출해서 리더십 획득하려고 계속 시도 (내 파드가 ready고 configmap 데이터에 리더 정보가 없으면 나를 리더로 설정 -> 되풀이)
 
 ---
-### 프로젝트 설정 
+## 프로젝트 설정 
 
 #### 1. 의존성 추가 
 
