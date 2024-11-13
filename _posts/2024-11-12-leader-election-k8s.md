@@ -146,8 +146,13 @@ spring:
 ```kotlin
 @RestController  
 @RequestMapping("/leader")  
-public class LeaderController {
-	
+public class LeaderController (
+	private val managerContext: ManagerContext,
+) {
+	/**  
+	* Handle a notification that this instance has become a leader.  
+	* @param event on granted event  
+	*/
 	@EventListener  
 	fun handleEvent(event: OnGrantedEvent) {  
 	    println(String.format("'%s' leadership granted", event.role))  
@@ -157,7 +162,8 @@ public class LeaderController {
 	}  
 	  
 	/**  
-	 * Handle a notification that this instance's leadership has been revoked. * @param event on revoked event  
+	 * Handle a notification that this instance's leadership has been revoked. 
+	 * @param event on revoked event  
 	 */@EventListener  
 	fun handleEvent(event: OnRevokedEvent) {  
 	    println(String.format("'%s' leadership revoked", event.role))  
@@ -169,6 +175,10 @@ public class LeaderController {
 	// TODO: startScheduler
 	// TODO: stopScheduler
 	
+	/**  
+	* Return a bool type data whether this instance is a leader or not.  
+	* @return isLeader data  
+	*/
 	private fun isLeader(): Boolean {  
 	    return this.context != null
 	}
