@@ -111,7 +111,7 @@ recordwatcher 가 configmap watch 하고 있고 변경 이벤트를 감지 (even
 경우3) **다른 파드가 리더면** acquire 호출해서 리더십 획득하려고 계속 시도 (내 파드가 ready고 configmap 데이터에 리더 정보가 없으면 나를 리더로 설정 -> 되풀이)
 
 ---
-## 프로젝트 설정 
+## 프로젝트 설정과 구현
 
 #### 1. 의존성 추가 
 
@@ -125,7 +125,7 @@ implementation("org.springframework.boot:spring-boot-starter-actuator")
 	- 기본적인 CRUD 작업뿐만 아니라 롤링 업데이트, 리소스 감시(watch), 로그 스트리밍, 리더 선출 등 다양한 고급 기능을 지원
 
 
-![https://swimminghwang.github.io/assets/Pastedimage20241113062204.png](https://swimminghwang.github.io/assets/Pastedimage20241113062204.png)
+![https://swimminghwang.github.io/assets/images/Pastedimage20241113062204.png](https://swimminghwang.github.io/assets/images/Pastedimage20241113062204.png)
 
 
 #### 2. 애플리케이션 설정 
